@@ -30,20 +30,25 @@ async def on_message(message):
 		for channel in server.channels:
 			if (channel.name == channelName):
 				channelId = channel.id
+				break
 
 		if (channelId == None):
 			await client.send_message(message.channel, "could not find channel " + channelName)
-
+			return
 		else:
 			await client.send_message(message.channel, "joining channnel with id " + channelId)
-			voiceChannel = client.get_channel(channelId)
-			
-			if (client.is_voice_connected(server)):
-				await client.voice_client_in(server).move_to(voiceChannel)
+		
+		voiceChannel = client.get_channel(channelId)
 
-			else:
-				await client.join_voice_channel(voiceChannel)
-	
+		if (client.is_voice_connected(server)):
+			await client.voice_client_in(server).move_to(voiceChannel)
+
+		else:
+			await client.join_voice_channel(voiceChannel)
+			#player = voice.create_ffmpeg_player("")
+			#player.stop()
+
+
 	elif (message.content == "!dc"):
 		server = message.server
 		if (client.is_voice_connected(server)):
@@ -54,18 +59,25 @@ async def on_message(message):
 
 	elif (message.content.startswith("!play")):
 		server = message.server
-		url = message.content[5:len(message.content)].strip()
-		await client.send_message(message.channel, "playing " + url)
+		url = message.content[5:len(message.content)].strip()	
 		if (client.is_voice_connected(server)):
-			url = "music/" + url + ".mp3"
-			voice = client.voice_client_in(server)
-			
 			if (player != None and player.is_playing()):
 				player.stop()
 
-			player = voice.create_ffmpeg_player(url)
-			player.volume = vol
-			player.start()
+			if ("youtube.com" in url):
+				await client.send_message(message.channel, "attempting to play youtube video")	
+				voice = client.voice_client_in(server)			
+				player = await voice.create_ytdl_player(url)
+				player.volume = vol
+				player.start()
+
+			else:
+				await client.send_message(message.channel, "attempting to play song: " + url + ".mp3")	
+				url = "music/" + url + ".mp3"
+				voice = client.voice_client_in(server)			
+				player = voice.create_ffmpeg_player(url)
+				player.volume = vol
+				player.start()
 
 		else:
 			await client.send_message(message.channel, "Mμ is not connected to a voice channel")
@@ -80,8 +92,7 @@ async def on_message(message):
 	elif (message.content.startswith("!vol")):
 		server = message.server
 		vol = float(message.content[4:len(message.content)].strip())
-		if (vol > 2.0):
-			vol /= 100
+		vol /= 100
 
 		if (vol > 2.0):
 			vol = 2.0
@@ -104,9 +115,10 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
+	global player
 	print("Logged in as")
 	print(client.user.name)
 	print(client.user.id)
 	print("------")
 
-client.run("token");
+client.run("NTQwMzczOTI0Nzg2MjA4Nzg4.DzvO6w.W4v9eusP-uxr3OKaCliUfPM3JB8");
