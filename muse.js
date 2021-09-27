@@ -2,6 +2,7 @@
 const fs = require('fs')
 const { Client, Collection, Intents } = require('discord.js');
 const { token } = require('./config.json');
+const player = require('./audioPlayer.js')
 
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.DIRECT_MESSAGES] });
@@ -9,7 +10,6 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-const player = require('./player.js')
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const player = require('../player.js');
+const audioPlayer = require('../audioPlayer.js');
 const command = "!queue";
 
 module.exports = {
@@ -26,12 +26,13 @@ module.exports = {
         }
 
         var guild = interaction.guildId;
+        // List out queue if no song specified
         if (toPlay == null) {
-            if (!player.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
+            if (!audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
                 return interaction.reply('No songs in queue.')
             }
-            var guildIndex = player.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-            guildQueue = player.guildQueues[guildIndex].queue;
+            var guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+            guildQueue = audioPlayer.guildQueues[guildIndex].queue;
             var reply = "";
             for (var i = 0; i < guildQueue.length; i++) {
                 reply = reply + ", " + guildQueue[i];
@@ -39,12 +40,12 @@ module.exports = {
             return interaction.reply(reply);
         }
         else {
-            if (player.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-                var guildIndex = player.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-                player.guildQueues[guildIndex].queue.push(toPlay);
+            if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
+                var guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+                audioPlayer.guildQueues[guildIndex].queue.push(toPlay);
             }
             else {
-                player.guildQueues.push({ guild: guild, queue: [toPlay] });
+                audioPlayer.guildQueues.push({ guild: guild, queue: [toPlay] });
             }
             return interaction.reply(`\`${toPlay}\` has been added to the queue.`);
         }
