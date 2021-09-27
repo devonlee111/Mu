@@ -5,7 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('disconnect')
         .setDescription('Disconnect from voice channel'),
-    async execute(interactioni, message) {
+    async execute(interaction, message) {
         if (interaction == null) {
             if (message == null) {
                 // should not happen
