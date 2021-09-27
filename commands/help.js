@@ -2,8 +2,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('Replies with Pong!'),
+        .setName('help')
+        .setDescription('Get help using Mμse.'),
     async execute(interaction, message) {
         if (interaction == null) {
             if (message == null) {
@@ -11,9 +11,9 @@ module.exports = {
                 console.log('no interaction or message provided');
                 return
             }
-            interaction = message;
+        interaction = message;
         }
-        return interaction.reply('Pong!');
-    },
+        interaction.reply('WIP');
+    }
 };
 

@@ -2,19 +2,39 @@ const play = require('play-dl');
 const { createAudioPlayer, createAudioResource, getVoiceConnection, NoSubscriberBehavior } = require('@discordjs/voice');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { youtubeAPI } = require('../config.json');
+const command = "!play"
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
         .setDescription('Plays a song!')
         .addStringOption(option => option.setName('song').setDescription('Enter a string')),
-    async execute(interaction) {
-        const toPlay = interaction.options.getString('song');
+    async execute(interaction, message) {
+        let toPlay = '';
+        if (interaction == null) {
+            if (message == null) {
+                // Should not happen
+                console.log('no interaction or message provided');
+                return
+            }
+            content = message.content.substring(command.length).trim();
+            toPlay = content;
+            interaction = message;
+        }
+        else {
+            toPlay = interaction.options.getString('song');
+        }
+
         if (toPlay == null) {
             return interaction.reply('No song specified.');
         }
-        const connection = getVoiceConnection(interaction.guildId);
-        const player = createAudioPlayer({
+
+        let connection = getVoiceConnection(interaction.guildId);
+        if (connection == null) {
+            // Todo add join
+        }
+
+        let player = createAudioPlayer({
             behaviors: {
                 noSubscriber: NoSubscriberBehavior.Play
             }

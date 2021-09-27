@@ -5,10 +5,17 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('join')
         .setDescription('Join a voice channel'),
-        //.addStringOption(option => option.setName('channel').setDescription('Enter a string')),
-    async execute(interaction) {
-        //const channel = interaction.options.getString('channel')
-        channel = interaction.member.voice.channel
+    async execute(interaction, message) {
+        if (interaction == null) {
+            if (message == null) {
+                // Should not happen
+                console.log('no interaction or message provided');
+                return
+            }
+            interaction = message;
+        }
+
+        var channel = interaction.member.voice.channel
         if (channel == null) {
             return interaction.reply('You are not in a voice channel!');
         }

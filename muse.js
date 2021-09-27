@@ -9,7 +9,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-var player = require('./player.js')
+const player = require('./player.js')
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
@@ -17,6 +17,8 @@ for (const file of commandFiles) {
     // With the key as the command name and the value as the exported module
     client.commands.set(command.data.name, command);
 }
+
+const prefix = '!'
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
@@ -26,17 +28,40 @@ client.once('ready', () => {
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
     
-    const command = client.commands.get(interaction.commandName);
+    var command = client.commands.get(interaction.commandName);
 
     if (!command) return;
 
     try {
-        await command.execute(interaction);
+        await command.execute(interaction, null);
     } catch (error) {
         console.error(error);
         await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
     }
 });
+
+client.on('messageCreate', async message => {
+    if (message.content.startsWith(prefix)) {
+        var content = message.content.substring(1);
+        var spaceIndex = content.indexOf(" ");
+        var cmd = "";
+        if (spaceIndex != -1) {
+            cmd = content.substring(0, spaceIndex);
+        }
+        else {
+            cmd = content;
+        }
+        
+        var command = client.commands.get(cmd);
+        if (command == null) {
+            message.reply('That is not a command.');
+            return;
+        }
+
+        await command.execute(null, message)
+    }
+});
+
 
 // Login to Discord with client token
 client.login(token);
