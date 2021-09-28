@@ -48,13 +48,6 @@ module.exports = {
             if (guildIndex == -1) {
                     return interaction.reply('There is nothing for me to play.');
             }
-            // If connected/there is a queue
-            else {
-                // If there is an associated player
-                if (audioPlayer.guildQueues[guildIndex].player != null) {
-                    return interaction.reply('Please give me something to play.');
-                }
-            }
         } 
         
         // Attempt to connect to voice channel if not already connected
@@ -88,31 +81,29 @@ module.exports = {
                 switch (newState.status) {
                     // Attempt to auto play from queue when idle
                     case 'idle':
-                        // reset playlist after reaching the end
-                        if (audioPlayer.guildQueues[guildIndex].queue.length <= 1) {
-                            console.log('end of queue');
-                            audioPlayer.guildQueues[guildIndex].queue[0] = "";
-                            console.log(audioPlayer.guildQueues[guildIndex].queue);
-                            return;
-                        }
+                        let currSong = audioPlayer.guildQueues[guildIndex].queue[0];
+                        let nextSong = '';
 
-                        // Get next song in queue
-                        let nextSong = audioPlayer.guildQueues[guildIndex].queue[1];
-
-                        // Remove currently playing song
-                        audioPlayer.guildQueues[guildIndex].queue.shift();
-
-                        /*
                         // Check if loop and replace song based on loop type
                         if (audioPlayer.guildQueues[guildIndex].loop == true) {
-                            nextSong = audioPlayer.guildQueues[guildIndex].currentSong;
+                            nextSong = currSong;
                         }
-                        // TODO add loop all command
                         // Check if loop all and replace song at end of queue
                         else if (audioPlayer.guildQueues[guildIndex].loopAll == true) {
-                            audioPlayer.guildQueues[guildIndex].queue.push(nextSong);
+                            audioPlayer.guildQueues[guildIndex].queue.shift();
+                            audioPlayer.guildQueues[guildIndex].queue.push(currSong);
+                            nextSong = audioPlayer.guildQueues[guildIndex].queue[0];
                         }
-                        */
+                        else {
+                            if (audioPlayer.guildQueues[guildIndex].queue.length <= 1) {
+                                console.log('end of queue');
+                                return;
+                            }
+
+                            // Remove currently playing song
+                            audioPlayer.guildQueues[guildIndex].queue.shift();
+                            nextSong = audioPlayer.guildQueues[guildIndex].queue[0];
+                        }                        
   
                         // Get audio stream of next song
                         let source = await play.stream(nextSong);
