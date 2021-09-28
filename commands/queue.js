@@ -25,27 +25,34 @@ module.exports = {
             toPlay = interaction.options.getString('song');
         }
 
-        var guild = interaction.guildId;
+        let guild = interaction.guildId;
         // List out queue if no song specified
         if (toPlay == null) {
+            // Check that guildQueue exists
             if (!audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
                 return interaction.reply('No songs in queue.')
             }
-            var guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+
+            let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
             guildQueue = audioPlayer.guildQueues[guildIndex].queue;
-            var reply = "";
-            for (var i = 0; i < guildQueue.length; i++) {
+            if (guildQueue.length == 0) { 
+                return interaction.reply('No songs in queue.')
+            }
+            
+            let reply = "";
+            for (let i = 0; i < guildQueue.length; i++) {
                 reply = reply + ", " + guildQueue[i];
             }
             return interaction.reply(reply);
         }
         else {
             if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-                var guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+                let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
                 audioPlayer.guildQueues[guildIndex].queue.push(toPlay);
             }
             else {
-                audioPlayer.guildQueues.push({ guild: guild, queue: [toPlay] });
+                let entry = new audioPlayer.guildQueueEntry(guild);
+                audioPlayer.guildQueues.push(entry);
             }
             return interaction.reply(`\`${toPlay}\` has been added to the queue.`);
         }
