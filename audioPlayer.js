@@ -1,8 +1,7 @@
 function GuildQueueEntry(guild) {
     this.guild = guild;
-    this.queue = [];
+    this.queue = []; // index 0 = current song, index 1 = next song
     this.player = null;
-    this.currentSong = "";
     this.loop = false;
     this.loopAll = false;
 }

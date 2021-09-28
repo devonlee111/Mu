@@ -3,8 +3,8 @@ const audioPlayer = require('../audioPlayer.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('loop')
-        .setDescription('Loop currently playing song.'),
+        .setName('loop_all')
+        .setDescription('Loop current queue.'),
     async execute(interaction, message) {
         if (interaction == null) {
             if (message == null) {
@@ -21,13 +21,13 @@ module.exports = {
         let guild = interaction.guildId;
         if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
             let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-            audioPlayer.guildQueues[guildIndex].loop = !audioPlayer.guildQueues[guildIndex].loop; 
+            audioPlayer.guildQueues[guildIndex].loopAll = !audioPlayer.guildQueues[guildIndex].loopAll; 
 
-            if (audioPlayer.guildQueues[guildIndex].loop) {
-                return interaction.reply('Looping currently playing song.');
+            if (audioPlayer.guildQueues[guildIndex].loopAll) {
+                return interaction.reply('Looping queue.');
             }
             else {
-                return interaction.reply('No longer looping currently playing song.');
+                return interaction.reply('No longer looping queue');
             }
         }
         

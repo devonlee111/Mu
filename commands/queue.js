@@ -46,12 +46,15 @@ module.exports = {
             return interaction.reply(reply);
         }
         else {
+            // Check if guild exists in guildQueues
             if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
                 let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
                 audioPlayer.guildQueues[guildIndex].queue.push(toPlay);
             }
             else {
+                // Create new guildQueue and set queue
                 let entry = new audioPlayer.guildQueueEntry(guild);
+                entry.queue = [ "", toPlay ]
                 audioPlayer.guildQueues.push(entry);
             }
             return interaction.reply(`\`${toPlay}\` has been added to the queue.`);

@@ -15,7 +15,7 @@ module.exports = {
     async execute(interaction, message) {
         let originalInteraction = interaction;
         let originalMessage = message;
-        let toPlay = null;
+        let toQueue = null;
 
         // Check if command was from message or slash command and handle accordingly
         if (interaction == null) {
@@ -26,45 +26,37 @@ module.exports = {
             }
             content = message.content.substring(command.length).trim();
             if (content != "") {
-                toPlay = content;
+                toQueue = content;
             }
             interaction = message;
         }
         else {
-            toPlay = interaction.options.getString('song');
+            toQueue = interaction.options.getString('song');
         }
 
         let guild = interaction.guildId;
+        let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+        let player = null;
 
-        if (toPlay == null) {
-            // Check if guild is in guildQueues (is playing or has a queue)
-
-            if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-                let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-                let player = audioPlayer.guildQueues[guildIndex].player;
-                if (player == null) {
-                    return;
-                }
-                
-                // Resume playback if paused
-                if (player.state.status == 'paused') {
-                    player.unpause();
-                    return interaction.reply('Mμse resuming playback...');
-                }
-                else if (player.state.status == 'playing') {
-                    return interaction.reply('Mμse is already playing');
-                }
-                else if (player.state.status == 'idle') {
-                    return interaction.reply('There is nothing for me to play...');
+        // Check if there is a song argument
+        if (toQueue != null) {
+            // Queue the song to be played
+            await queue.execute(originalInteraction, originalMessage);
+        }
+        else {
+            // If not connected/no queue
+            if (guildIndex == -1) {
+                    return interaction.reply('There is nothing for me to play.');
+            }
+            // If connected/there is a queue
+            else {
+                // If there is an associated player
+                if (audioPlayer.guildQueues[guildIndex].player != null) {
+                    return interaction.reply('Please give me something to play.');
                 }
             }
-   
-            return interaction.reply('No song specified.');
-        }
-
-        // Queue the song to be played
-        await queue.execute(originalInteraction, originalMessage);
-
+        } 
+        
         // Attempt to connect to voice channel if not already connected
         let connection = getVoiceConnection(interaction.guildId);
         if (connection == null) {
@@ -75,9 +67,8 @@ module.exports = {
             }
         }
 
-        let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-        let player = null
-        
+        guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+ 
         // Create new audio player if one does not exist for the guild
         if (audioPlayer.guildQueues[guildIndex].player == null) {
             player = createAudioPlayer({
@@ -97,38 +88,42 @@ module.exports = {
                 switch (newState.status) {
                     // Attempt to auto play from queue when idle
                     case 'idle':
-                        let nextSong = '';
+                        // reset playlist after reaching the end
+                        if (audioPlayer.guildQueues[guildIndex].queue.length <= 1) {
+                            console.log('end of queue');
+                            audioPlayer.guildQueues[guildIndex].queue[0] = "";
+                            console.log(audioPlayer.guildQueues[guildIndex].queue);
+                            return;
+                        }
 
+                        // Get next song in queue
+                        let nextSong = audioPlayer.guildQueues[guildIndex].queue[1];
+
+                        // Remove currently playing song
+                        audioPlayer.guildQueues[guildIndex].queue.shift();
+
+                        /*
                         // Check if loop and replace song based on loop type
                         if (audioPlayer.guildQueues[guildIndex].loop == true) {
                             nextSong = audioPlayer.guildQueues[guildIndex].currentSong;
                         }
-                        else {
-                            // Check if queue is empty
-                            if (audioPlayer.guildQueues[guildIndex].queue.length == 0) {
-                                return
-                            }
-
-                            // Get next song in queue
-                            nextSong = audioPlayer.guildQueues[guildIndex].queue[0];
-
-                            // Remove currently playing song
-                            audioPlayer.guildQueues[guildIndex].queue.shift();
-
-                            // TODO add loop all command
-                            // Check if loop all and replace song at end of queue
-                            if (audioPlayer.guildQueues[guildIndex].loopAll == true) {
-                                audioPlayer.guildQueues[guildIndex].queue.push(nextSong);
-                            }
+                        // TODO add loop all command
+                        // Check if loop all and replace song at end of queue
+                        else if (audioPlayer.guildQueues[guildIndex].loopAll == true) {
+                            audioPlayer.guildQueues[guildIndex].queue.push(nextSong);
                         }
-                            
+                        */
+  
                         // Get audio stream of next song
                         let source = await play.stream(nextSong);
                         let audioResource = createAudioResource(source.stream, {
                             inputType : source.type
                         });
-                 
+
+                        // Play song                 
                         player.play(audioResource);
+
+                        // Set guildQueue currently playing song
                         audioPlayer.guildQueues[guildIndex].currentSong = nextSong;
 
                         break;
@@ -148,22 +143,41 @@ module.exports = {
 
             connection.subscribe(player);
         }
+        // Audio player already exists for guild
         else {
             player = audioPlayer.guildQueues[guildIndex].player;
-            if (player.state.status == 'playing') {
+            
+            // Resume playback if paused
+            if (player.state.status == 'paused') {
+                player.unpause();
+                return interaction.reply('Mμse resuming playback...');
+            }
+            // Do nothing if currently playing
+            else if (player.state.status == 'playing') {
                 return;
+            }
+            // If idle, no entries in queue
+            else if (player.state.status == 'idle') {
+                if (audioPlayer.guildQueues[guildIndex].queue.length < 2) {
+                    return interaction.reply('There is nothing for me to play...');
+                }
             }
         }
 
+        // Play initial song
+        let nextSong = audioPlayer.guildQueues[guildIndex].queue[1];
+        audioPlayer.guildQueues[guildIndex].queue.shift();
+
         // Get audio stream
-        let source = await play.stream(toPlay);
+        let source = await play.stream(nextSong);
         let audioResource = createAudioResource(source.stream, {
             inputType : source.type
         });
+
+        // Play song
         player.play(audioResource);
-        audioPlayer.guildQueues[guildIndex].currentSong = toPlay;
-        
-        return interaction.reply(`Now playing \`${toPlay}\``);
+
+        return interaction.reply(`Now playing \`${nextSong}\``);
     },
 };
 
