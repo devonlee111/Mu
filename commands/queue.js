@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const audioPlayer = require('../audioPlayer.js');
-const command = "!queue";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,7 +14,7 @@ module.exports = {
                 console.log('no interaction or message provided');
                 return
             }
-            content = message.content.substring(command.length).trim();
+            content = message.content.trim();
             if (content != "") {
                 toPlay = content;
             }

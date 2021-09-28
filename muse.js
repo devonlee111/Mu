@@ -47,9 +47,11 @@ client.on('messageCreate', async message => {
         var cmd = "";
         if (spaceIndex != -1) {
             cmd = content.substring(0, spaceIndex);
+            message.content = content.substring(spaceIndex + 1);
         }
         else {
             cmd = content;
+            message.content = '';
         }
         
         var command = client.commands.get(cmd);

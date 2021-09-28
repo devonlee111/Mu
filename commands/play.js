@@ -1,11 +1,9 @@
 const play = require('play-dl');
 const { createAudioPlayer, createAudioResource, getVoiceConnection, NoSubscriberBehavior } = require('@discordjs/voice');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { youtubeAPI } = require('../config.json');
 const audioPlayer = require('../audioPlayer.js');
 const join = require('./join.js');
 const queue = require('./queue.js');
-const command = "!play";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -24,7 +22,7 @@ module.exports = {
                 console.log('no interaction or message provided');
                 return
             }
-            content = message.content.substring(command.length).trim();
+            content = message.content.trim();
             if (content != "") {
                 toQueue = content;
             }
@@ -97,6 +95,7 @@ module.exports = {
                         else {
                             if (audioPlayer.guildQueues[guildIndex].queue.length <= 1) {
                                 console.log('end of queue');
+                                audioPlayer.guildQueues[guildIndex].queue[0] = '';
                                 return;
                             }
 
@@ -160,6 +159,12 @@ module.exports = {
         audioPlayer.guildQueues[guildIndex].queue.shift();
 
         // Get audio stream
+        if (nextSong == null || nextSong == '') {
+            return;
+        }
+
+        console.log(nextSong);
+
         let source = await play.stream(nextSong);
         let audioResource = createAudioResource(source.stream, {
             inputType : source.type
