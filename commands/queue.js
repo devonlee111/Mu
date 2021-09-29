@@ -1,5 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const audioPlayer = require('../audioPlayer.js');
+const play = require('play-dl');
+
+const searchOptions = {
+    limit : 1
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,6 +27,15 @@ module.exports = {
         }
         else {
             toPlay = interaction.options.getString('song');
+        }
+
+        let validURL = play.yt_validate(toPlay);
+        if (!validURL) {
+            let searchResults = await play.search(toPlay, searchOptions);
+            toPlay = searchResults[0].url;
+        }
+        else if (validURL === "playlist") {
+            return interaction.reply("I cannot play playists.");
         }
 
         let guild = interaction.guildId;
