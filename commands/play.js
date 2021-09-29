@@ -96,6 +96,8 @@ module.exports = {
                             if (audioPlayer.guildQueues[guildIndex].queue.length <= 1) {
                                 console.log('end of queue');
                                 audioPlayer.guildQueues[guildIndex].queue[0] = '';
+                                audioPlayer.guildQueues[guildIndex].player.stop();
+                                audioPlayer.guildQueues[guildIndex].player = null;
                                 return;
                             }
 

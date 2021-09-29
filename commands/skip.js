@@ -24,7 +24,12 @@ module.exports = {
         let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
         // If guild not in guildQueues
         if (guildIndex == -1) {
-            
+            return interaction.reply('I\'m not currently playing anything');            
+        }
+
+        let player = audioPlayer.guildQueues[guildIndex].player;
+        if (player == null) {
+            return interaction.reply('I\'m not currently playing anything');            
         }
 
         //audioPlayer.guildQueues[guildIndex].queue.shift();
