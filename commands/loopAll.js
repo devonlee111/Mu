@@ -3,7 +3,7 @@ const audioPlayer = require('../audioPlayer.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('loop_all')
+        .setName('loopq')
         .setDescription('Loop current queue.'),
     async execute(interaction, message) {
         if (interaction == null) {

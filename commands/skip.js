@@ -35,7 +35,7 @@ module.exports = {
         //audioPlayer.guildQueues[guildIndex].queue.shift();
         console.log(audioPlayer.guildQueues[guildIndex].queue);
         audioPlayer.guildQueues[guildIndex].player.stop();
-        audioPlayer.guildQueues[guildIndex].player = null;
+        //audioPlayer.guildQueues[guildIndex].player = null;
         await play.execute(originalInteraction, originalMessage);
 
         return interaction.reply('skipped');

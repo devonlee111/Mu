@@ -28,16 +28,7 @@ module.exports = {
         else {
             toPlay = interaction.options.getString('song');
         }
-
-        let validURL = play.yt_validate(toPlay);
-        if (!validURL) {
-            let searchResults = await play.search(toPlay, searchOptions);
-            toPlay = searchResults[0].url;
-        }
-        else if (validURL === "playlist") {
-            return interaction.reply("I cannot play playists.");
-        }
-
+ 
         let guild = interaction.guildId;
         // List out queue if no song specified
         if (toPlay == null) {
@@ -59,6 +50,15 @@ module.exports = {
             return interaction.reply(reply);
         }
         else {
+            let validURL = play.yt_validate(toPlay);
+            if (!validURL) {
+                let searchResults = await play.search(toPlay, searchOptions);
+                toPlay = searchResults[0].url;
+            }
+            else if (validURL === "playlist") {
+                return interaction.reply("I cannot play playists.");
+            }
+
             // Check if guild exists in guildQueues
             if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
                 let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));

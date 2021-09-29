@@ -4,8 +4,8 @@ const audioPlayer = require('../audioPlayer.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('disconnect')
-        .setDescription('Disconnect from voice channel'),
+        .setName('stop')
+        .setDescription('Stop playing and empty queue'),
     async execute(interaction, message) {
         if (interaction == null) {
             if (message == null) {
@@ -17,19 +17,20 @@ module.exports = {
         }
 
         var guild = interaction.guildId;
-        
         const connection = getVoiceConnection(guild)
         if (connection == null) {
             return interaction.reply('Not connected to a voice channel');
         }
-        connection.destroy();
 
-        if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-            let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-            audioPlayer.guildQueues.splice(guildIndex, 1);
+        let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+        let player = audioPlayer.guildQueues[guildIndex].player;
+        if (player != null) {
+            player.stop();
         }
 
-        return interaction.reply("Disconnecting...");
+        audioPlayer.guildQueues[guildIndex].queue = [ '' ];
+
+        return interaction.reply("Stopping...");
     },
 };
 

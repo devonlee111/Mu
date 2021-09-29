@@ -53,6 +53,8 @@ client.on('messageCreate', async message => {
             cmd = content;
             message.content = '';
         }
+
+        cmd = cmd.toLowerCase();
         
         var command = client.commands.get(cmd);
         if (command == null) {
