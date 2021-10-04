@@ -20,7 +20,7 @@ module.exports = {
         
         const connection = getVoiceConnection(guild)
         if (connection == null) {
-            return interaction.reply('Not connected to a voice channel');
+            return 'I\'m not currently connected to a voice channel.';
         }
         connection.destroy();
 
@@ -29,7 +29,7 @@ module.exports = {
             audioPlayer.guildQueues.splice(guildIndex, 1);
         }
 
-        return interaction.reply("Disconnecting...");
+        return 'Disconnecting...';
     },
 };
 

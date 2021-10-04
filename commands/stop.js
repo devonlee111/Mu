@@ -19,7 +19,7 @@ module.exports = {
         var guild = interaction.guildId;
         const connection = getVoiceConnection(guild)
         if (connection == null) {
-            return interaction.reply('Not connected to a voice channel');
+            return 'I\'m not connected to a voice channel.';
         }
 
         let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
@@ -30,7 +30,7 @@ module.exports = {
 
         audioPlayer.guildQueues[guildIndex].queue = [ '' ];
 
-        return interaction.reply("Stopping...");
+        return 'Stopping...';
     },
 };
 

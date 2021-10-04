@@ -33,10 +33,11 @@ client.on('interactionCreate', async interaction => {
     if (!command) return;
 
     try {
-        await command.execute(interaction, null);
+        let reply = await command.execute(interaction, null);
+        return interaction.reply(reply);
     } catch (error) {
-        console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        console.log(error);
+        return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
     }
 });
 
@@ -58,11 +59,11 @@ client.on('messageCreate', async message => {
         
         var command = client.commands.get(cmd);
         if (command == null) {
-            message.reply('That is not a command.');
-            return;
+            return message.reply('That is not a command.');
         }
 
-        await command.execute(null, message)
+        let reply = await command.execute(null, message)
+        return message.reply(reply);
     }
 });
 

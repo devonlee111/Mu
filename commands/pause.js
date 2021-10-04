@@ -22,7 +22,7 @@ module.exports = {
         // Attempt to connect to voice channel if not already connected
         let connection = getVoiceConnection(interaction.guildId);
         if (connection == null) {
-            return interaction.reply('Not currently in a voice channel.');
+            return 'I\'m not currently in a voice channel.';
         }
 
         let guild = interaction.guildId;
@@ -38,7 +38,7 @@ module.exports = {
 
             player.pause();
         }       
-        return interaction.reply('Pausing playback...');
+        return 'Pausing playback...';
     },
 };
 

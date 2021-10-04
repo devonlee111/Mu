@@ -24,14 +24,14 @@ module.exports = {
             audioPlayer.guildQueues[guildIndex].loop = !audioPlayer.guildQueues[guildIndex].loop; 
 
             if (audioPlayer.guildQueues[guildIndex].loop) {
-                return interaction.reply('Looping currently playing song.');
+                return 'Ok. Looping currently playing song.';
             }
             else {
-                return interaction.reply('No longer looping currently playing song.');
+                return 'I\'m no longer looping the current song.';
             }
         }
         
-        return interaction.reply('Not currently playing anything');        
+        return 'I\'m ot currently playing anything.';
     }
 };
 

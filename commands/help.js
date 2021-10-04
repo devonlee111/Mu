@@ -13,7 +13,7 @@ module.exports = {
             }
         interaction = message;
         }
-        interaction.reply('WIP');
+        return 'WIP';
     }
 };
 

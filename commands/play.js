@@ -14,7 +14,7 @@ module.exports = {
         let originalInteraction = interaction;
         let originalMessage = message;
         let toQueue = null;
-
+        let reply = '';
         // Check if command was from message or slash command and handle accordingly
         if (interaction == null) {
             if (message == null) {
@@ -39,12 +39,12 @@ module.exports = {
         // Check if there is a song argument
         if (toQueue != null) {
             // Queue the song to be played
-            await queue.execute(originalInteraction, originalMessage);
+            reply = await queue.execute(originalInteraction, originalMessage);
         }
         else {
             // If not connected/no queue
             if (guildIndex == -1) {
-                    return interaction.reply('There is nothing for me to play.');
+                    return 'There is nothing for me to play.';
             }
         } 
         
@@ -54,7 +54,7 @@ module.exports = {
             await join.execute(originalInteraction, originalMessage);
             connection = getVoiceConnection(interaction.guildId);
             if (connection == null) {
-                return interaction.reply('Failed to connect to voice channel.');
+                return 'I\'ve failed to connect to the voice channel.';
             }
         }
 
@@ -142,16 +142,16 @@ module.exports = {
             // Resume playback if paused
             if (player.state.status == 'paused') {
                 player.unpause();
-                return interaction.reply('Mμse resuming playback...');
+                return 'Mμse resuming playback...';
             }
             // Do nothing if currently playing
             else if (player.state.status == 'playing') {
-                return;
+                return reply;
             }
             // If idle, no entries in queue
             else if (player.state.status == 'idle') {
                 if (audioPlayer.guildQueues[guildIndex].queue.length < 2) {
-                    return interaction.reply('There is nothing for me to play...');
+                    return 'There is nothing for me to play...';
                 }
             }
         }
@@ -175,7 +175,7 @@ module.exports = {
         // Play song
         player.play(audioResource);
 
-        return interaction.reply(`Now playing \`${nextSong}\``);
+        return `Now playing \`${nextSong}\``;
     },
 };
 

@@ -34,20 +34,21 @@ module.exports = {
         if (toPlay == null) {
             // Check that guildQueue exists
             if (!audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-                return interaction.reply('No songs in queue.')
+                let channel = await interaction.client.channels.fetch(interaction.channelId);
+                return 'No songs in queue.'
             }
 
             let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
             guildQueue = audioPlayer.guildQueues[guildIndex].queue;
             if (guildQueue.length == 0) { 
-                return interaction.reply('No songs in queue.')
+                return interaction.reply('There are no songs in queue.')
             }
             
             let reply = "";
             for (let i = 0; i < guildQueue.length; i++) {
                 reply = reply + ", " + guildQueue[i];
             }
-            return interaction.reply(reply);
+            return reply;
         }
         else {
             let validURL = play.yt_validate(toPlay);
@@ -56,7 +57,7 @@ module.exports = {
                 toPlay = searchResults[0].url;
             }
             else if (validURL === "playlist") {
-                return interaction.reply("I cannot play playists.");
+                return "I cannot play playists.";
             }
 
             // Check if guild exists in guildQueues
@@ -70,7 +71,7 @@ module.exports = {
                 entry.queue = [ "", toPlay ]
                 audioPlayer.guildQueues.push(entry);
             }
-            return interaction.reply(`\`${toPlay}\` has been added to the queue.`);
+            return `I have added \`${toPlay}\` has been added to the queue.`;
         }
     },
 };

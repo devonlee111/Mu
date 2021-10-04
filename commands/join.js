@@ -17,7 +17,7 @@ module.exports = {
 
         var channel = interaction.member.voice.channel
         if (channel == null) {
-            return interaction.reply('You are not in a voice channel!');
+            return 'Please join a voice channel first!';
         }
         var connection = joinVoiceChannel({
             channelId: channel.id,
@@ -29,7 +29,7 @@ module.exports = {
             console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
         });
 
-        return interaction.reply("Connecting...");
+        return 'Connecting...';
     },
 };
 

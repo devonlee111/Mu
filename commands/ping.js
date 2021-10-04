@@ -13,7 +13,7 @@ module.exports = {
             }
             interaction = message;
         }
-        return interaction.reply('Pong!');
+        return 'Pong!';
     },
 };
 
