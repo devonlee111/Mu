@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const audioPlayer = require('../audioPlayer.js');
 const playdl = require('play-dl');
-
+const wait = require('util').promisify(setTimeout);
 const searchOptions = {
     limit : 1
 }
@@ -41,9 +41,11 @@ module.exports = {
             let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
             guildQueue = audioPlayer.guildQueues[guildIndex].queue;
             if (guildQueue.length == 0) { 
-                return interaction.reply('There are no songs in queue.')
+                return 'There are no songs in queue.'
             }
-            
+          
+			await interaction.reply("Ok. One moment while I get that for you...")
+  
             let reply = "";
             for (let i = 0; i < guildQueue.length; i++) {
 				let entry = guildQueue[i]
@@ -59,7 +61,8 @@ module.exports = {
                 	reply = reply + "\n" + title;
 				}
             }
-            return `Here's what I got:\n\`${reply}\``;
+            interaction.channel.send(`Here's what I got:\n\`${reply}\``);
+			return null
         }
         else {
             let validURL = playdl.yt_validate(toPlay);
