@@ -46,9 +46,20 @@ module.exports = {
             
             let reply = "";
             for (let i = 0; i < guildQueue.length; i++) {
-                reply = reply + ", " + guildQueue[i];
+				let entry = guildQueue[i]
+				if (entry == "") {
+					continue
+				}	
+				let video = await playdl.video_basic_info(guildQueue[i]);
+				let title = video.video_details.title;
+				if (reply == "") {
+					reply = title;
+				}
+				else {
+                	reply = reply + "\n" + title;
+				}
             }
-            return reply;
+            return `Here's what I got:\n\`${reply}\``;
         }
         else {
             let validURL = playdl.yt_validate(toPlay);
