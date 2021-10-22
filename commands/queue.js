@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const audioPlayer = require('../audioPlayer.js');
-const play = require('play-dl');
+const playdl = require('play-dl');
 
 const searchOptions = {
     limit : 1
@@ -51,14 +51,17 @@ module.exports = {
             return reply;
         }
         else {
-            let validURL = play.yt_validate(toPlay);
+            let validURL = playdl.yt_validate(toPlay);
             if (!validURL) {
-                let searchResults = await play.search(toPlay, searchOptions);
+                let searchResults = await playdl.search(toPlay, searchOptions);
                 toPlay = searchResults[0].url;
             }
             else if (validURL === "playlist") {
                 return "I cannot play playists.";
             }
+
+			let video = await playdl.video_basic_info(toPlay);
+			let title = video.video_details.title;
 
             // Check if guild exists in guildQueues
             if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
@@ -71,7 +74,7 @@ module.exports = {
                 entry.queue = [ "", toPlay ]
                 audioPlayer.guildQueues.push(entry);
             }
-            return `I have added \`${toPlay}\` has been added to the queue.`;
+            return `I have added \`${title}\` has been added to the queue.`;
         }
     },
 };
