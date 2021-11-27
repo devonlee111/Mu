@@ -15,7 +15,7 @@ for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     // Set a new item in the Collection
     // With the key as the command name and the value as the exported module
-    client.commands.set(command.data.name, command);
+   	client.commands.set(command.data.name, command);
 }
 
 const prefix = '!'
@@ -65,7 +65,9 @@ client.on('messageCreate', async message => {
         }
 
         let reply = await command.execute(null, message)
-        return message.reply(reply);
+		if (reply != null) {
+        	return message.reply(reply);
+		}
     }
 });
 

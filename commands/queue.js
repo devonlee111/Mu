@@ -3,7 +3,8 @@ const audioPlayer = require('../audioPlayer.js');
 const playdl = require('play-dl');
 const wait = require('util').promisify(setTimeout);
 const searchOptions = {
-    limit : 1
+    limit : 1,
+	source : { youtube : "video" },
 }
 
 module.exports = {
@@ -66,30 +67,45 @@ module.exports = {
         }
         else {
             let validURL = playdl.yt_validate(toPlay);
-            if (!validURL) {
-                let searchResults = await playdl.search(toPlay, searchOptions);
-                toPlay = searchResults[0].url;
-            }
-            else if (validURL === "playlist") {
-                return "I cannot play playists.";
-            }
+			switch (validURL) {
+				case "playlist":
+					console.log("toPlay is type playlist");
+					return 'I cannot play playlists';
+					break;
+
+				case "video":
+					console.log("toPlay is type video");
+					break;
+
+				case "search":
+					console.log("toPlay is type search");
+					console.log("searching for yt video: " + toPlay);
+        	       	let searchResults = await playdl.search(toPlay, searchOptions);
+            	   	toPlay = searchResults[0].url;
+					break;
+
+				case false:
+					console.log("toPlay is not valid");
+					return "invalid error"
+					break;
+			}
 
 			let video = await playdl.video_basic_info(toPlay);
 			let title = video.video_details.title;
 
-            // Check if guild exists in guildQueues
-            if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
-                let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
-                audioPlayer.guildQueues[guildIndex].queue.push(toPlay);
-            }
-            else {
-                // Create new guildQueue and set queue
-                let entry = new audioPlayer.guildQueueEntry(guild);
-                entry.queue = [ "", toPlay ]
-                audioPlayer.guildQueues.push(entry);
-            }
-            return `I have added \`${title}\` has been added to the queue.`;
-        }
+        	// Check if guild exists in guildQueues
+        	if (audioPlayer.guildQueues.some(guildQueue => guildQueue.guild == guild)) {
+            	let guildIndex = audioPlayer.guildQueues.findIndex((guildQueue => guildQueue.guild == guild));
+            	audioPlayer.guildQueues[guildIndex].queue.push(toPlay);
+        	}
+        	else {
+            	// Create new guildQueue and set queue
+            	let entry = new audioPlayer.guildQueueEntry(guild);
+            	entry.queue = [ "", toPlay ]
+            	audioPlayer.guildQueues.push(entry);
+        	}
+        	return `I have added \`${title}\` has been added to the queue.`;
+		}
     },
 };
 
