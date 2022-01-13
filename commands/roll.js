@@ -5,10 +5,10 @@ const crit = "crit";			// Marked as 'c' in roll command
 const validRoll = /\d+d\d+(kh?l?\d+)?$/;
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('test')
+	data: new SlashCommandBuilder()
+        .setName('roll')
         .setDescription('Roll some dice!'),
-    async execute(interaction, message) {
+   async execute(interaction, message) {
         let originalInteraction = interaction;
         let originalMessage = message;
         let fullRoll = null;

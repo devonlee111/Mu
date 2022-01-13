@@ -9,10 +9,17 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
+const slashCommandFiles = fs.readdirSync('./slashcommands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
+    // Set a new item in the Collection
+    // With the key as the command name and the value as the exported module
+   	client.commands.set(command.data.name, command);
+}
+
+for (const file of slashCommandFiles) {
+    const command = require(`./slashcommands/${file}`);
     // Set a new item in the Collection
     // With the key as the command name and the value as the exported module
    	client.commands.set(command.data.name, command);
@@ -70,7 +77,6 @@ client.on('messageCreate', async message => {
 		}
     }
 });
-
 
 // Login to Discord with client token
 client.login(token);
