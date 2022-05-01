@@ -1,3 +1,5 @@
+const { MessageEmbed } = require('discord.js');
+
 const wait = require('util').promisify(setTimeout);
 const youtube = require('youtube-sr').default;
 
@@ -23,22 +25,19 @@ module.exports = {
 
 		// List out queue if no user input
 		if (toQueue == null) {
-			let queue = guildAudioInfo.queue;
-			for (var i = 0; i < queue.length; i++) {
-				console.log(queue[i].title);
-			}
-			if (guildAudioInfo.nowPlaying != null) {
-				console.log("now playing\n" + guildAudioInfo.nowPlaying.title);
-			}
-			// TODO format queue string and return
+			queueEmbed = createDiscordQueueEmbed(guildAudioInfo)
+			message.channel.send({ embeds: [queueEmbed] });
 			return;
 		}
 		// Queue the given media
 		else {
-			queueAudio(guildAudioInfo, toQueue)
+			let entry = await queueAudio(guildAudioInfo, toQueue)
+			entryEmbed = createDiscordQueueMediaEmbed(entry);
+			message.channel.send({ embeds: [entryEmbed] });
 		}
 	},
 	queueAudio,
+	createDiscordQueueMediaEmbed,
 };
 
 async function queueAudio(guildAudioInfo, input) {
@@ -48,6 +47,7 @@ async function queueAudio(guildAudioInfo, input) {
 		return;
 	}
 	guildAudioInfo.queueAudioEntry(entry);
+	return entry;
 }
 
 // check what type of input user provided (search, video url, playlist url, invalid url)
@@ -92,7 +92,7 @@ async function processUserInput(input) {
 		case "invalid":
 			// attempt to extract video substring from user input
 			// useful for when video is part of a playlist
-			match = input.match(ytVideoRegex);
+			let match = input.match(ytVideoRegex);
 			if (match != null) {
 				// create entry if a valid URL is found
 				entry = await(createMediaEntry(match));
@@ -106,7 +106,7 @@ async function processUserInput(input) {
 
 async function searchYoutube(search) {
 	let searchResults = await(youtube.searchOne(search));
-	url = ytVideoPrefix + searchResults.id;
+	let url = ytVideoPrefix + searchResults.id;
 	return url;
 }
 
@@ -121,6 +121,54 @@ async function createMediaEntry(url) {
 	return entry;
 }
 
+// Creates a discord embed for showing the current queue
+function createDiscordQueueEmbed(guildAudioInfo) {
+	let queue = guildAudioInfo.queue;
+	let currentIndex = guildAudioInfo.index;
+	let queueEmbed = new MessageEmbed()
+		.setColor('#ffc5f7')
+		.setTitle('Current Queue')
+		.setDescription('Listing current queue')
+		.setTimestamp()
+
+	let queueString = "";
+
+	for (var i = 0; i < queue.length; i++) {
+		let rowString = "\n" + i;
+		rowString += ". " + queue[i].title + "\n";
+		if (i == currentIndex) {
+			rowString = "**" + rowString + "**";
+		}
+		queueString += rowString;		
+	}
+
+	queueEmbed.addFields(
+		{ name: 'Queue', value: queueString },
+		{ name: '\u200B', value: '\u200B' },
+	)
+
+	return queueEmbed
+}
+
+// Creates a discord embed for queueing a specific media entry
+function createDiscordQueueMediaEmbed(entry) {
+	let entryEmbed = new MessageEmbed()
+		.setColor('#ffc5f7')
+		.setTitle('Song Queued')
+		.setDescription('Queueing requested song')
+		.addFields(
+			{ name: 'Title', value: entry.title, inline: true },
+			{ name: 'Uploader', value: entry.channel, inline: true },
+			{ name: 'Duration', value: entry.duration, inline: true },
+			{ name: '\u200B', value: '\u200B' },
+		)
+		.setTimestamp()
+		.setFooter({ text: entry.url })
+
+	return entryEmbed
+}
+
+// Verify if a url is a valid youtube video
 function validYoutubeVideo(url) {
 	return ytVideoRegex.test(url)
 }

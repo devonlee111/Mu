@@ -1,4 +1,6 @@
 const { createAudioPlayer, createAudioResource, getVoiceConnection, NoSubscriberBehavior } = require('@discordjs/voice');
+const { MessageEmbed } = require('discord.js');
+
 const ytdl = require('ytdl-core');
 
 const join = require('./join.js');
@@ -19,7 +21,10 @@ module.exports = {
 		content = message.content.trim();
 		if (content != "") {
 			let toQueue = content;
-			await queue.queueAudio(guildAudioInfo, toQueue);
+			entry = await queue.queueAudio(guildAudioInfo, toQueue);
+			entryEmbed = queue.createDiscordQueueMediaEmbed(entry);
+			message.channel.send({ embeds: [entryEmbed] });
+			// message.reply();
 		}	
 
 		// Check if there is anything left to play in the queue
@@ -76,7 +81,7 @@ module.exports = {
 };
 
 // Create a new player with default handlers
-function createPlayer() {
+function createPlayer(guildInfo) {
 	player = createAudioPlayer({
 		behaviors: {
 		noSubscriber: NoSubscriberBehavior.Play
@@ -89,6 +94,7 @@ function createPlayer() {
 		switch (newState.status) {
 			// Attempt to auto play from queue when idle
 			case 'idle':
+				let guildAudioInfo = guildInfo.audioInfo;
 				guildAudioInfo.cycleQueue();
 				let nowPlaying = guildAudioInfo.nowPlaying;
 				if (nowPlaying == null) {
@@ -112,9 +118,9 @@ function createPlayer() {
 	return player;
 }
 
-	// Cycle to next item in queue
-	// Play the current audio
-	async function playNext(guildAudioInfo) {
+// Cycle to next item in queue
+// Play the current audio
+async function playNext(guildAudioInfo) {
 	player = guildAudioInfo.subscription.player;
 	guildAudioInfo.cycleQueue();
 	let nowPlaying = guildAudioInfo.nowPlaying;
