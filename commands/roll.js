@@ -1,14 +1,11 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
 const advantage = "adv";		// Marked as 'a' in roll command
 const disadvantage = "disadv";	// Marked as 'b' in roll command
 const crit = "crit";			// Marked as 'c' in roll command
 const validRoll = /\d+d\d+(kh?l?\d+)?$/;
 
 module.exports = {
-	data: new SlashCommandBuilder()
-        .setName('roll')
-        .setDescription('Roll some dice!'),
-   async execute(interaction, message) {
+   	name: "roll",
+	async execute(interaction, message) {
         let originalInteraction = interaction;
         let originalMessage = message;
         let fullRoll = null;

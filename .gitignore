@@ -1,4 +1,5 @@
 config.json
+temp/
 node_modules/
 package-lock.json
 package.json
