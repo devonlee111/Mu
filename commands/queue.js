@@ -132,6 +132,7 @@ async function createMediaEntry(url) {
 // Creates a discord embed for showing the current queue
 function createDiscordQueueEmbed(guildAudioInfo) {
 	let queue = guildAudioInfo.queue;
+	let nowPlaying = guildAudioInfo.nowPlaying;
 	let currentIndex = guildAudioInfo.index;
 	let queueEmbed = new MessageEmbed()
 		.setColor('#ffc5f7')
@@ -141,18 +142,21 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 
 	let queueString = "";
 
-	if (queue.length > 0) {
-		for (var i = 0; i < queue.length; i++) {
-			let rowString = "\n" + (i + 1);
-			rowString += ". " + queue[i].title + "\n";
-			if (i == currentIndex) {
-				rowString = "**" + rowString + "**";
-			}
-			queueString += rowString;		
-		}
-	}
-	else {
+	// nothing currently playing and nothing in queue
+	if (queue.length == 0) {
 		queueString = "Queue Empty";
+	}
+	else { 
+		if (queue.length > 0) {
+			for (var i = 0; i < queue.length; i++) {
+				let rowString = "\n" + (i + 1);
+				rowString += ". " + queue[i].title + "\n";
+				if (i == currentIndex) {
+					rowString = "**" + rowString + "**";
+				}
+				queueString += rowString;
+			}
+		}
 	}
 
 	queueEmbed.addFields(

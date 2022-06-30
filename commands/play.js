@@ -50,7 +50,7 @@ module.exports = {
 		if (guildAudioInfo.subscription == null) {
 			console.log("no subscription found")
 			console.log("creating new player...");
-			let newPlayer = createPlayer();
+			let newPlayer = createPlayer(guildInfo);
 
 			console.log("subscribing connection to new player...");
 			let subscription = connection.subscribe(newPlayer);
@@ -130,7 +130,14 @@ async function playNext(guildAudioInfo) {
 		return;
 	}
 
-	let stream = ytdl(nowPlaying.url, { filter: 'audioonly' });
+	let stream = ytdl(nowPlaying.url, {
+		filter: 'audioonly',
+		highWaterMark: 1 << 62,
+		liveBuffer: 1 << 62,
+		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
+		bitrate: 128,
+	});
+
 	let resource = createAudioResource(stream);
 
 	player.play(resource);

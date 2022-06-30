@@ -28,7 +28,19 @@ function GuildAudioInfo() {
 		switch (this.loopType) {
 			// no looping, just get next audio
 			case "none":
-				this.nowPlaying = this.queue.shift();
+				if (this.nowPlaying == null) {
+					// nothing playing, just set first element in queue to now playing
+					if (this.queue.length > 0) {
+						this.nowPlaying = this.queue[0];
+					}
+				}
+				else {
+					// something is playing, shift the queue and set now playing to first element
+					this.queue.shift();
+					this.nowPlaying = this.queue[0];
+				}
+
+				// reset state if nothing left in queue
 				if (this.nowPlaying == undefined) {
 					this.nowPlaying = null;
 				}
