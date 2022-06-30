@@ -31,7 +31,12 @@ module.exports = {
 		}
 		// Queue the given media
 		else {
-			let entry = await queueAudio(guildAudioInfo, toQueue)
+			try {
+				let entry = await queueAudio(guildAudioInfo, toQueue)
+			} catch(e) {
+				message.reply("failed to queue media: " + e.message);
+				return
+			}
 			entryEmbed = createDiscordQueueMediaEmbed(entry);
 			message.channel.send({ embeds: [entryEmbed] });
 		}
@@ -42,9 +47,10 @@ module.exports = {
 
 async function queueAudio(guildAudioInfo, input) {
 	let entry;
-	entry = await(processUserInput(input));
-	if (entry == null) {
-		return;
+	try {
+		entry = await(processUserInput(input));
+	} catch(e) {
+		throw e
 	}
 	guildAudioInfo.queueAudioEntry(entry);
 	return entry;
@@ -78,7 +84,7 @@ async function processUserInput(input) {
 		case "playlist":
 			// can't queue playlist
 			// TODO allow queueing of every video in playlist
-			return null;
+			throw new Error("cannot queue playlists... yet.");
 			break;
 
 		// create entry from search result
@@ -95,11 +101,14 @@ async function processUserInput(input) {
 			let match = input.match(ytVideoRegex);
 			if (match != null) {
 				// create entry if a valid URL is found
-				entry = await(createMediaEntry(match));
+				try {
+					entry = await(createMediaEntry(match));
+				} catch(e) {
+					throw e
+				}
 				return entry;
 			}
-
-			return null;
+			throw new Error("invalid url provided")
 			break;
 	}
 }
@@ -112,8 +121,7 @@ async function searchYoutube(search) {
 
 async function createMediaEntry(url) {
 	if (!validYoutubeVideo) {
-		// throw new Error('invalid video');
-		return
+		throw new Error('invalid youtube url');
 	}
 
 	video = await(youtube.getVideo(url));
@@ -133,13 +141,18 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 
 	let queueString = "";
 
-	for (var i = 0; i < queue.length; i++) {
-		let rowString = "\n" + i;
-		rowString += ". " + queue[i].title + "\n";
-		if (i == currentIndex) {
-			rowString = "**" + rowString + "**";
+	if (queue.length > 0) {
+		for (var i = 0; i < queue.length; i++) {
+			let rowString = "\n" + (i + 1);
+			rowString += ". " + queue[i].title + "\n";
+			if (i == currentIndex) {
+				rowString = "**" + rowString + "**";
+			}
+			queueString += rowString;		
 		}
-		queueString += rowString;		
+	}
+	else {
+		queueString = "Queue Empty";
 	}
 
 	queueEmbed.addFields(
