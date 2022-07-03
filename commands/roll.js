@@ -112,10 +112,6 @@ function executeRolls(rollOperations) {
 			// If not special operation character, treat as regular roll operation
 			default:
 				// Check if roll operation is just a constant
-				if (!isNaN(nextOperation)) {
-					console.log("roll is just a constant");
-					break;
-				}
 
 				try {
 					var { rollResultString, total } = resolveRoll(nextOperation);
