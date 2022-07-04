@@ -4,7 +4,7 @@ const wait = require('util').promisify(setTimeout);
 const youtube = require('youtube-sr').default;
 
 // Regex for verifying/finding youtube video in input
-const ytVideoRegex = /https:\/\/www\.youtube\.com\/watch\?v=[a-zA-Z0-9_]{11}/;
+const ytVideoRegex = /https:\/\/www\.youtube\.com\/watch\?v=[a-zA-Z0-9_-]{11}/;
 const ytPlaylistRegex = /https:\/\/www\.youtube\.com\/playlist\?list=/;
 const linkPrefix = "https://";
 const ytVideoPrefix = "https://www.youtube.com\/watch\?v=";
