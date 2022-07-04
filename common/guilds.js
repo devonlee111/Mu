@@ -101,7 +101,6 @@ function GuildAudioInfo() {
 	this.clearQueue = function() {
 		this.queue = [];
 		this.index = 0;
-		this.nowPlaying = null;
 	}
 
 	// changes loop type
