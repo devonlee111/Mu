@@ -8,6 +8,7 @@ function GuildAudioInfo() {
 	this.index = 0;
 	this.queue = [];
 	this.loopType = "none";
+	this.autoplay = false;
 
 	this.reset = function() {
 		this.subscription = null;
@@ -15,6 +16,7 @@ function GuildAudioInfo() {
 		this.index = 0;
 		this.queue = [];
 		this.loopType = "none";
+		this.autoplay = false;
 	}
 
 	// Add new entry to queue
@@ -28,6 +30,7 @@ function GuildAudioInfo() {
 		switch (this.loopType) {
 			// no looping, just get next audio
 			case "none":
+				let lastPlaying = this.nowPlaying;
 				if (this.nowPlaying == null) {
 					// nothing playing, just set first element in queue to now playing
 					if (this.queue.length > 0) {
@@ -40,8 +43,8 @@ function GuildAudioInfo() {
 					this.nowPlaying = this.queue[0];
 				}
 
-				// reset state if nothing left in queue
 				if (this.nowPlaying == undefined) {
+					// reset state if nothing left in queue and not autoplaying
 					this.nowPlaying = null;
 				}
 				break;

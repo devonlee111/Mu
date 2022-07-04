@@ -94,16 +94,38 @@ function createPlayer(guildInfo) {
 		switch (newState.status) {
 			// Attempt to auto play from queue when idle
 			case 'idle':
-				let guildAudioInfo = guildInfo.audioInfo;
+				var guildAudioInfo = guildInfo.audioInfo;
+				var lastPlaying = guildAudioInfo.nowPlaying;
 				guildAudioInfo.cycleQueue();
-				let nowPlaying = guildAudioInfo.nowPlaying;
+				var nowPlaying = guildAudioInfo.nowPlaying;
 				if (nowPlaying == null) {
-					console.log('Nothing left to play');
-					return;
+					if (guildAudioInfo.autoplay) {
+						if (lastPlaying != null) {
+							try {
+								var url = await(queue.getNextPlaying(lastPlaying.url));
+								await queue.queueAudio(guildAudioInfo, url);
+								guildAudioInfo.cycleQueue();
+								nowPlaying = guildAudioInfo.nowPlaying;
+							}
+							catch(e) {
+								console.log(e.message);
+								return;
+							}
+						}
+						else {
+							// last playing is null... somehow
+							// TODO do something
+							return;
+						}
+					}
+					else {
+						console.log('Nothing left to play');
+						return;
+					}
 				}
 
-				let stream = ytdl(nowPlaying.url, { filter: 'audioonly' });
-				let resource = createAudioResource(stream);
+				var stream = ytdl(nowPlaying.url, { filter: 'audioonly' });
+				var resource = createAudioResource(stream);
 
 				player.play(resource);
 				break;
@@ -121,16 +143,38 @@ function createPlayer(guildInfo) {
 // Cycle to next item in queue
 // Play the current audio
 async function playNext(guildAudioInfo) {
-	player = guildAudioInfo.subscription.player;
+	var player = guildAudioInfo.subscription.player;
+	var lastPlaying = guildAudioInfo.nowPlaying;
 	guildAudioInfo.cycleQueue();
-	let nowPlaying = guildAudioInfo.nowPlaying;
+
+	nowPlaying = guildAudioInfo.nowPlaying;
 	if (nowPlaying == null) {
-		console.log('Nothing left to play');
-		player.stop();
-		return;
+		if (guildAudioInfo.autoplay) {
+			if (lastPlaying != null) {
+				try {
+					var url = await(queue.getNextPlaying(lastPlaying.url));
+					await queue.queueAudio(guildAudioInfo, url);
+					guildAudioInfo.cycleQueue();
+					nowPlaying = guildAudioInfo.nowPlaying;
+				}
+				catch(e) {
+					console.log(e.message);
+					return;
+				}
+			}
+			else {
+				// last playing is null... somehow
+				// TODO do something
+				return;
+			}
+		}
+		else {
+			console.log('Nothing left to play');
+			return;
+		}
 	}
 
-	let stream = ytdl(nowPlaying.url, {
+	var stream = ytdl(nowPlaying.url, {
 		filter: 'audioonly',
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
@@ -138,7 +182,7 @@ async function playNext(guildAudioInfo) {
 		bitrate: 128,
 	});
 
-	let resource = createAudioResource(stream);
+	var resource = createAudioResource(stream);
 
 	player.play(resource);
 }

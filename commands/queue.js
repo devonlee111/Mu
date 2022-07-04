@@ -9,7 +9,7 @@ const ytPlaylistRegex = /https:\/\/www\.youtube\.com\/playlist\?list=/;
 const linkPrefix = "https://";
 const ytVideoPrefix = "https://www.youtube.com\/watch\?v=";
 
-const guilds = require('../common/guilds.js')
+const guilds = require('../common/guilds.js');
 
 module.exports = {
 	name: "queue",
@@ -42,6 +42,7 @@ module.exports = {
 		}
 	},
 	queueAudio,
+	getNextPlaying,
 	createDiscordQueueMediaEmbed,
 };
 
@@ -124,9 +125,21 @@ async function createMediaEntry(url) {
 		throw new Error('invalid youtube url');
 	}
 
-	video = await(youtube.getVideo(url));
-	entry = new guilds.AudioEntry(url, video.title, video.durationFormatted, video.channel.name);
+	let video = await(youtube.getVideo(url));
+	let entry = new guilds.AudioEntry(url, video.title, video.durationFormatted, video.channel.name);
 	return entry;
+}
+
+// Gets the next playing video url from the supplied video url
+async function getNextPlaying(url, guildInfo) {
+	if (!validYoutubeVideo) {
+		throw new Error('invalid youtube url');
+	}
+
+	let video = await(youtube.getVideo(url));
+	let nextPlayingUrl = video.videos[0].url;
+
+	return nextPlayingUrl;
 }
 
 // Creates a discord embed for showing the current queue
@@ -138,7 +151,7 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 		.setColor('#ffc5f7')
 		.setTitle('Current Queue')
 		.setDescription('Listing current queue')
-		.setTimestamp()
+		.setTimestamp();
 
 	let queueString = "";
 
@@ -162,9 +175,9 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 	queueEmbed.addFields(
 		{ name: 'Queue', value: queueString },
 		{ name: '\u200B', value: '\u200B' },
-	)
+	);
 
-	return queueEmbed
+	return queueEmbed;
 }
 
 // Creates a discord embed for queueing a specific media entry
@@ -180,13 +193,14 @@ function createDiscordQueueMediaEmbed(entry) {
 			{ name: '\u200B', value: '\u200B' },
 		)
 		.setTimestamp()
-		.setFooter({ text: entry.url })
+		.setFooter({ text: entry.url });
 
-	return entryEmbed
+	return entryEmbed;
 }
 
 // Verify if a url is a valid youtube video
 function validYoutubeVideo(url) {
-	return ytVideoRegex.test(url)
+	console.log(url);
+	return ytVideoRegex.test(url);
 }
 
