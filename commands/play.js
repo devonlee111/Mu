@@ -2,6 +2,8 @@ const { createAudioPlayer, createAudioResource, getVoiceConnection, NoSubscriber
 const { MessageEmbed } = require('discord.js');
 
 const ytdl = require('ytdl-core');
+const dytdl = require('discord-ytdl-core');
+const playdl = require('play-dl');
 
 const join = require('./join.js');
 const queue = require('./queue.js');
@@ -84,7 +86,7 @@ module.exports = {
 function createPlayer(guildInfo) {
 	player = createAudioPlayer({
 		behaviors: {
-		noSubscriber: NoSubscriberBehavior.Play
+			noSubscriber: NoSubscriberBehavior.Play
 		}
 	});
 
@@ -145,6 +147,7 @@ function createPlayer(guildInfo) {
 async function playNext(guildAudioInfo) {
 	var player = guildAudioInfo.subscription.player;
 	var lastPlaying = guildAudioInfo.nowPlaying;
+
 	guildAudioInfo.cycleQueue();
 
 	nowPlaying = guildAudioInfo.nowPlaying;
@@ -159,31 +162,57 @@ async function playNext(guildAudioInfo) {
 				}
 				catch(e) {
 					console.log(e.message);
+					player.stop();
 					return;
 				}
 			}
 			else {
 				// last playing is null... somehow
 				// TODO do something
+				player.stop();
 				return;
 			}
 		}
 		else {
+			player.stop();
 			console.log('Nothing left to play');
 			return;
 		}
 	}
 
+	/*
+	// node-ytdl-core version
+	// has issues with disconnects after a while
 	var stream = ytdl(nowPlaying.url, {
 		filter: 'audioonly',
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
 		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
 		bitrate: 128,
+		//quality: "lowestaudio",
 	});
+	*/
 
-	var resource = createAudioResource(stream);
+	/*
 
+	// discord-ytdl-core version
+	// generates EPIPE error immediately
+	/*
+	var stream = dytdl(nowPlaying.url, {
+		filter: 'audioonly',
+		opusEncoded: true,
+	});
+	*/
+	
+	// var resource = createAudioResource(stream);
+
+	// play-dl version
+	source = await playdl.stream(nowPlaying.url);
+
+	var resource = createAudioResource(source.stream, {
+		inputType : source.type
+	});
+	
 	player.play(resource);
 }
 
