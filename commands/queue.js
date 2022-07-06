@@ -76,12 +76,12 @@ async function queueAudio(message, guildAudioInfo, input) {
 			break;
 
 		case "playlist":
-			// can't queue playlist
-			// TODO allow queueing of every video in playlist
+			// queue every entry from playlist
+			message.reply("queueing entire playlist.\nthis might take a little while depending on the length of the playlist");
 			var playlist = await(youtube.getPlaylist(input));
 			var list = await playlist.fetch();
 
-			queuePlaylist(guildAudioInfo, playlist);
+			await queuePlaylist(guildAudioInfo, playlist);
 
 			embed = createDiscordQueuePlaylistEmbed(list);
 			break;

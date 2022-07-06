@@ -22,11 +22,16 @@ module.exports = {
 		// Queue any media provided by the user
 		content = message.content.trim();
 		if (content != "") {
+			console.log(content);
 			let toQueue = content;
-			entry = await queue.queueAudio(guildAudioInfo, toQueue);
-			entryEmbed = queue.createDiscordQueueMediaEmbed(entry);
-			message.channel.send({ embeds: [entryEmbed] });
-			// message.reply();
+			try {
+				embed = await queue.queueAudio(message, guildAudioInfo, toQueue);
+				message.channel.send({ embeds: [embed] });
+			}
+			catch(e) {
+				console.log(e.messsage);
+				message.reply("oopsy. something went wrong.");
+			}
 		}	
 
 		// Check if there is anything left to play in the queue
@@ -44,6 +49,7 @@ module.exports = {
 			} catch(e) {
 				// TODO error handling
 				console.log(e.message);
+				message.reply("oopsy. something went wrong.");
 				return;
 			}
 		}
