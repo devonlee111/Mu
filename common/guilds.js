@@ -9,6 +9,7 @@ function GuildAudioInfo() {
 	this.queue = [];
 	this.loopType = "none";
 	this.autoplay = false;
+	this.shuffleLoop = false;
 
 	this.reset = function() {
 		this.subscription = null;
@@ -17,6 +18,7 @@ function GuildAudioInfo() {
 		this.queue = [];
 		this.loopType = "none";
 		this.autoplay = false;
+		this.shuffleLoop = false;
 	}
 
 	// Add new entry to queue
@@ -76,6 +78,9 @@ function GuildAudioInfo() {
 				// check if it has reached the end of queue and wrap around
 				if (this.index >= this.queue.length) {
 					this.index = 0;
+					if (this.shuffleLoop) {
+						this.shuffleQueue();
+					}
 				}
 				this.nowPlaying = this.queue[this.index];
 				break;
@@ -101,6 +106,20 @@ function GuildAudioInfo() {
 	this.clearQueue = function() {
 		this.queue = [];
 		this.index = 0;
+	}
+
+	this.shuffleQueue = function() {
+		var curId = this.queue.length;
+  		// There remain elements to shuffle
+  		while (0 !== curId) {
+    		// Pick a remaining element
+    		let randId = Math.floor(Math.random() * curId);
+    		curId -= 1;
+    		// Swap it with the current element.
+    		let tmp = this.queue[curId];
+    		this.queue[curId] = this.queue[randId];
+    		this.queue[randId] = tmp;
+  		}
 	}
 
 	// changes loop type

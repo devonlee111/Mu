@@ -5,7 +5,7 @@ module.exports = {
     name: "skip",
     async execute(guildInfo, message) {
 		play.playNext(guildInfo.audioInfo);
-    	message.reply("skipping next song...");
+    	message.reply("skipping to next song...");
 	}
 };
 
