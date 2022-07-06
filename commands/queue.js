@@ -32,13 +32,14 @@ module.exports = {
 		// Queue the given media
 		else {
 			try {
-				let entry = await queueAudio(guildAudioInfo, toQueue)
+				var embed = await queueAudio(message, guildAudioInfo, toQueue)
 			} catch(e) {
 				message.reply("failed to queue media: " + e.message);
 				return
 			}
-			entryEmbed = createDiscordQueueMediaEmbed(entry);
-			message.channel.send({ embeds: [entryEmbed] });
+			if (embed != null) {
+				message.channel.send({ embeds: [embed] });
+			}
 		}
 	},
 	queueAudio,
@@ -46,20 +47,9 @@ module.exports = {
 	createDiscordQueueMediaEmbed,
 };
 
-async function queueAudio(guildAudioInfo, input) {
-	let entry;
-	try {
-		entry = await(processUserInput(input));
-	} catch(e) {
-		throw e
-	}
-	guildAudioInfo.queueAudioEntry(entry);
-	return entry;
-}
-
 // check what type of input user provided (search, video url, playlist url, invalid url)
 // attempt to make a media entry out of provided input
-async function processUserInput(input) {
+async function queueAudio(message, guildAudioInfo, input) {
 	inputType = "search";
 
 	// check if link, and check which youtube link type if any
@@ -75,24 +65,33 @@ async function processUserInput(input) {
 		}
 	}
 
+	var embed = null;
+
 	switch (inputType) {
 		// create entry directly from supplied video URL
 		case "video":
 			entry = await(createMediaEntry(input));
-			return entry;
+			guildAudioInfo.queueAudioEntry(entry);
+			embed = createDiscordQueueMediaEmbed(entry);
 			break;
 
 		case "playlist":
 			// can't queue playlist
 			// TODO allow queueing of every video in playlist
-			throw new Error("cannot queue playlists... yet.");
+			var playlist = await(youtube.getPlaylist(input));
+			var list = await playlist.fetch();
+
+			queuePlaylist(guildAudioInfo, playlist);
+
+			embed = createDiscordQueuePlaylistEmbed(list);
 			break;
 
 		// create entry from search result
 		case "search":
-			url = await(searchYoutube(input));
-			entry = await(createMediaEntry(url));
-			return entry;
+			var url = await(searchYoutube(input));
+			var entry = await(createMediaEntry(url));
+			guildAudioInfo.queueAudioEntry(entry);
+			embed = createDiscordQueueMediaEmbed(entry);
 			break;
 
 		// try to see if there is a valid url within the supplied input
@@ -107,11 +106,20 @@ async function processUserInput(input) {
 				} catch(e) {
 					throw e
 				}
-				return entry;
+				guildAudioInfo.queueAudioEntry(entry);
+				embed = createDiscordQueueMediaEmbed(entry);
 			}
 			throw new Error("invalid url provided")
 			break;
 	}
+	return embed;
+}
+
+async function queuePlaylist(guildAudioInfo, playlist) {
+	for (const video of playlist.videos) {
+		entry = await(createMediaEntry(video.url));
+		guildAudioInfo.queueAudioEntry(entry);
+	};
 }
 
 async function searchYoutube(search) {
@@ -163,9 +171,11 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 		if (queue.length > 0) {
 			for (var i = 0; i < queue.length; i++) {
 				let rowString = "\n" + (i + 1);
-				rowString += ". " + queue[i].title + "\n";
 				if (i == currentIndex) {
-					rowString = "**" + rowString + "**";
+					rowString += ". **>** " + queue[i].title + " **<**\n";
+				}
+				else {
+					rowString += ". " + queue[i].title + "\n";
 				}
 				queueString += rowString;
 			}
@@ -184,8 +194,8 @@ function createDiscordQueueEmbed(guildAudioInfo) {
 function createDiscordQueueMediaEmbed(entry) {
 	let entryEmbed = new MessageEmbed()
 		.setColor('#ffc5f7')
-		.setTitle('Song Queued')
-		.setDescription('Queueing requested song')
+		.setTitle('Media Queued')
+		.setDescription('Queueing requested media')
 		.addFields(
 			{ name: 'Title', value: entry.title, inline: true },
 			{ name: 'Uploader', value: entry.channel, inline: true },
@@ -196,6 +206,22 @@ function createDiscordQueueMediaEmbed(entry) {
 		.setFooter({ text: entry.url });
 
 	return entryEmbed;
+}
+
+function createDiscordQueuePlaylistEmbed(playlist) {
+	var playlistEmbed = new MessageEmbed()
+		.setColor('#ffc5f7')
+		.setTitle('Playlist Queued')
+		.setDescription('Queueing requested playlist')
+		.addFields(
+			{ name: 'Title', value: playlist.title, inline: true },
+			{ name: 'Length', value: playlist.videoCount.toString(), inline: true },
+			{ name: '\u200B', value: '\u200B' },
+		)
+		.setTimestamp()
+		.setFooter({ text: playlist.url });
+
+	return playlistEmbed;
 }
 
 // Verify if a url is a valid youtube video
