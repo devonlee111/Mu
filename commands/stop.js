@@ -9,7 +9,7 @@ module.exports = {
 		}
 
 		let player = guildInfo.audioInfo.subscription.player;
-
+		guildInfo.audioInfo.loopType = "none";
 		player.stop();
     },
 };
