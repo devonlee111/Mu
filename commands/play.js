@@ -20,6 +20,7 @@ module.exports = {
 		let player = null;
 	
 		// Queue any media provided by the user
+		console.log(message.content);
 		content = message.content.trim();
 		if (content != "") {
 			console.log(content);
@@ -213,7 +214,7 @@ async function playNext(guildAudioInfo) {
 	// var resource = createAudioResource(stream);
 
 	// play-dl version
-	source = await playdl.stream(nowPlaying.url);
+	source = await playdl.stream(nowPlaying.url, { seek : nowPlaying.seek });
 
 	var resource = createAudioResource(source.stream, {
 		inputType : source.type

@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js');
 
 const wait = require('util').promisify(setTimeout);
 const youtube = require('youtube-sr').default;
+const guilds = require('../common/guilds.js');
 
 // Regex for verifying/finding youtube video in input
 const ytVideoRegex = /https:\/\/www\.youtube\.com\/watch\?v=[a-zA-Z0-9_-]{11}/;
@@ -9,7 +10,7 @@ const ytPlaylistRegex = /https:\/\/www\.youtube\.com\/playlist\?list=/;
 const linkPrefix = "https://";
 const ytVideoPrefix = "https://www.youtube.com\/watch\?v=";
 
-const guilds = require('../common/guilds.js');
+const seekPrefix = "seek";
 
 module.exports = {
 	name: "queue",
@@ -50,6 +51,24 @@ module.exports = {
 // check what type of input user provided (search, video url, playlist url, invalid url)
 // attempt to make a media entry out of provided input
 async function queueAudio(message, guildAudioInfo, input) {
+	let seek = 0
+
+	var lastSpace = content.lastIndexOf(' ');
+	var lastArg = content.slice(lastSpace + 1);
+	if (lastArg.startsWith(seekPrefix)) {
+		var seekStr = lastArg.slice(seekPrefix.length);
+		if (!isNaN(seekStr)) {
+			input = content.slice(0, lastSpace);
+			seek = Number(seekStr);
+		} else {
+			message.reply("uh oh. I don't recognize that seek value");
+			throw new Error("invalid seek");
+		}
+	}
+
+	console.log(input);
+	console.log(seek);
+
 	inputType = "search";
 
 	// check if link, and check which youtube link type if any
@@ -70,7 +89,7 @@ async function queueAudio(message, guildAudioInfo, input) {
 	switch (inputType) {
 		// create entry directly from supplied video URL
 		case "video":
-			entry = await(createMediaEntry(input));
+			entry = await(createMediaEntry(input, seek));
 			guildAudioInfo.queueAudioEntry(entry);
 			embed = createDiscordQueueMediaEmbed(entry);
 			break;
@@ -89,7 +108,7 @@ async function queueAudio(message, guildAudioInfo, input) {
 		// create entry from search result
 		case "search":
 			var url = await(searchYoutube(input));
-			var entry = await(createMediaEntry(url));
+			var entry = await(createMediaEntry(url, seek));
 			guildAudioInfo.queueAudioEntry(entry);
 			embed = createDiscordQueueMediaEmbed(entry);
 			break;
@@ -102,7 +121,7 @@ async function queueAudio(message, guildAudioInfo, input) {
 			if (match != null) {
 				// create entry if a valid URL is found
 				try {
-					entry = await(createMediaEntry(match));
+					entry = await(createMediaEntry(match, seek));
 				} catch(e) {
 					throw e
 				}
@@ -117,7 +136,7 @@ async function queueAudio(message, guildAudioInfo, input) {
 
 async function queuePlaylist(guildAudioInfo, playlist) {
 	for (const video of playlist.videos) {
-		entry = await(createMediaEntry(video.url));
+		entry = await(createMediaEntry(video.url), 0);
 		guildAudioInfo.queueAudioEntry(entry);
 	};
 }
@@ -128,13 +147,13 @@ async function searchYoutube(search) {
 	return url;
 }
 
-async function createMediaEntry(url) {
+async function createMediaEntry(url, seek) {
 	if (!validYoutubeVideo) {
 		throw new Error('invalid youtube url');
 	}
 
 	let video = await(youtube.getVideo(url));
-	let entry = new guilds.AudioEntry(url, video.title, video.durationFormatted, video.channel.name);
+	let entry = new guilds.AudioEntry(url, seek, video.title, video.durationFormatted, video.channel.name);
 	return entry;
 }
 

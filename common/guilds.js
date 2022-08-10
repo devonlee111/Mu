@@ -150,8 +150,9 @@ function GuildAudioInfo() {
 	}
 }
 
-function AudioEntry(url, title, duration, channel) {
+function AudioEntry(url, seek, title, duration, channel) {
 	this.url = url;
+	this.seek = seek;
 	this.title = title;
 	this.duration = duration;
 	this.channel = channel;
