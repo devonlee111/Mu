@@ -1,225 +1,87 @@
-const { createAudioPlayer, createAudioResource, getVoiceConnection, NoSubscriberBehavior } = require('@discordjs/voice');
-const { MessageEmbed } = require('discord.js');
-
-const ytdl = require('ytdl-core');
-const dytdl = require('discord-ytdl-core');
-const playdl = require('play-dl');
-
-const join = require('./join.js');
-const queue = require('./queue.js');
-
 module.exports = {
 	name: "play",
 	// 1.  Queue any media provided by user
 	// 2a. Resume playing if it is paused
 	// 2b. Start playing if it is not currently playing
-	async execute(guildInfo, message) {
-		let guildID = message.guildId;
-		let guildAudioInfo = guildInfo.audioInfo;
-		let connection = null;
-		let player = null;
-	
-		// Queue any media provided by the user
-		console.log(message.content);
-		content = message.content.trim();
-		if (content != "") {
-			console.log(content);
-			let toQueue = content;
-			try {
-				embed = await queue.queueAudio(message, guildAudioInfo, toQueue);
-				message.channel.send({ embeds: [embed] });
-			}
-			catch(e) {
-				console.log(e.messsage);
-				message.reply("oopsy. something went wrong.");
-			}
-		}	
-
-		// Check if there is anything left to play in the queue
-		if (guildAudioInfo.queue.length == 0) {
-			console.log("nothing to play");
+	async execute(message, player = undefined) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong");
 			return;
-		}	
+		}
 
-		// Connect to voice channel if not connected to one already
-		connection = getVoiceConnection(guildID);
-		if (connection == undefined) {
-			console.log("not connected to voice channel, attempting to join first");
-			try {
-				connection = join.joinChannel(message.member.voice.channel);
-			} catch(e) {
-				// TODO error handling
-				console.log(e.message);
-				message.reply("oopsy. something went wrong.");
-				return;
+		query = message.content.trim();
+		if (query != "") {
+			let queue = player.getQueue(message.guild);
+			if (queue == undefined) {
+				options = {
+					leaveOnEnd: false,
+    				leaveOnEndCooldown: 1,
+    				leaveOnStop: false,
+    				leaveOnEmpty: false,
+				}
+				queue = player.createQueue(message.guild, options);
+			} else {
+				queue = player.getQueue(message.guild);
+				console.log(queue.playing);
 			}
-		}
 
-		// Create new audio player if one does not exist for the guild		
-		if (guildAudioInfo.subscription == null) {
-			console.log("no subscription found")
-			console.log("creating new player...");
-			let newPlayer = createPlayer(guildInfo);
-
-			console.log("subscribing connection to new player...");
-			let subscription = connection.subscribe(newPlayer);
-			guildAudioInfo.subscription = subscription;
-		}
-
-		player = guildAudioInfo.subscription.player;
-
-		// Handle switching to playing state
-		// Unpause if paused
-		// Do nothing if already playing
-		switch(player.state.status) {
-			case 'paused':
-				console.log("resumed playing");
-				player.unpause();
-				return;
-				break;
-
-			case 'playing':
-				console.log("already playing something");
-				return;
-				break;
-		}
-	
-		playNext(guildAudioInfo);
-	},
-	playNext,
-};
-
-// Create a new player with default handlers
-function createPlayer(guildInfo) {
-	player = createAudioPlayer({
-		behaviors: {
-			noSubscriber: NoSubscriberBehavior.Play
-		}
-	});
-
-	// Handle audio player state changes
-	player.on('stateChange', async (oldState, newState) => {
-		console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
-		switch (newState.status) {
-			// Attempt to auto play from queue when idle
-			case 'idle':
-				var guildAudioInfo = guildInfo.audioInfo;
-				var lastPlaying = guildAudioInfo.nowPlaying;
-				guildAudioInfo.cycleQueue();
-				var nowPlaying = guildAudioInfo.nowPlaying;
-				if (nowPlaying == null) {
-					if (guildAudioInfo.autoplay) {
-						if (lastPlaying != null) {
-							try {
-								var url = await(queue.getNextPlaying(lastPlaying.url));
-								await queue.queueAudio(guildAudioInfo, url);
-								guildAudioInfo.cycleQueue();
-								nowPlaying = guildAudioInfo.nowPlaying;
-							}
-							catch(e) {
-								console.log(e.message);
-								return;
-							}
-						}
-						else {
-							// last playing is null... somehow
-							// TODO do something
-							return;
-						}
-					}
-					else {
-						console.log('Nothing left to play');
-						return;
-					}
-				}
-
-				var stream = ytdl(nowPlaying.url, { filter: 'audioonly' });
-				var resource = createAudioResource(stream);
-
-				player.play(resource);
-				break;
-		}
-	});
-
-	// Handle audio player errors.
-	player.on('error', error => {
-		console.log(error);
-	});
-
-	return player;
-}
-
-// Cycle to next item in queue
-// Play the current audio
-async function playNext(guildAudioInfo) {
-	var player = guildAudioInfo.subscription.player;
-	var lastPlaying = guildAudioInfo.nowPlaying;
-
-	guildAudioInfo.cycleQueue();
-
-	nowPlaying = guildAudioInfo.nowPlaying;
-	if (nowPlaying == null) {
-		if (guildAudioInfo.autoplay) {
-			if (lastPlaying != null) {
+			let song = await player.search(query, {
+				requestedBy: message.author
+			});
+				
+			// verify vc connection
+			if (queue.connection == undefined) {
 				try {
-					var url = await(queue.getNextPlaying(lastPlaying.url));
-					await queue.queueAudio(guildAudioInfo, url);
-					guildAudioInfo.cycleQueue();
-					nowPlaying = guildAudioInfo.nowPlaying;
-				}
-				catch(e) {
+					await queue.connect(message.member.voice.channel);
+				} catch(e) {
 					console.log(e.message);
-					player.stop();
+					message.reply("oh no. I can't join the vc");
+					queue.destroy();
 					return;
 				}
 			}
-			else {
-				// last playing is null... somehow
-				// TODO do something
-				player.stop();
+
+			if (!song) {
+				message.reply("whoops. I wasn't able to find that for you");
 				return;
 			}
+
+			if (song.playlist) {
+				queue.addTracks(song.tracks);
+			} else {
+			queue.addTrack(song.tracks[0]);
+			}
+
+			if (!queue.playing) {
+				queue.playing = true;
+				await queue.play();
+			}
+		} else {
+			let queue = player.getQueue(message.guild);
+			if (queue == undefined) {
+				message.reply("you didn't specify something for me to play");
+			} else {
+				// verify vc connection
+				if (queue.connection == undefined) {
+					try {
+						await queue.connect(message.member.voice.channel);
+					} catch(e) {
+						console.log(e.message);
+						message.reply("oh no. I can't join the vc");
+						queue.destroy();
+						return;
+					}
+				}
+				if (!queue.playing) {
+					console.log("not playing anything, begin playing");
+					queue.playing = true;
+					await queue.play();
+				} else {
+					if (queue.connection.paused) {
+						queue.setPaused(false);
+					}
+				}
+			}
 		}
-		else {
-			player.stop();
-			console.log('Nothing left to play');
-			return;
-		}
-	}
-
-	/*
-	// node-ytdl-core version
-	// has issues with disconnects after a while
-	var stream = ytdl(nowPlaying.url, {
-		filter: 'audioonly',
-		highWaterMark: 1 << 62,
-		liveBuffer: 1 << 62,
-		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
-		bitrate: 128,
-		//quality: "lowestaudio",
-	});
-	*/
-
-	/*
-
-	// discord-ytdl-core version
-	// generates EPIPE error immediately
-	/*
-	var stream = dytdl(nowPlaying.url, {
-		filter: 'audioonly',
-		opusEncoded: true,
-	});
-	*/
-	
-	// var resource = createAudioResource(stream);
-
-	// play-dl version
-	source = await playdl.stream(nowPlaying.url, { seek : nowPlaying.seek });
-
-	var resource = createAudioResource(source.stream, {
-		inputType : source.type
-	});
-	
-	player.play(resource);
-}
-
+	},
+};

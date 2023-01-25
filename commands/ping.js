@@ -1,7 +1,6 @@
 module.exports = {
     name: "ping",
-    async execute(guildInfo, message) {
+    async execute(message) {
         message.reply("Pong!");
     },
 };
-

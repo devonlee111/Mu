@@ -5,7 +5,10 @@ const validRoll = /\d+d\d+(kh?l?\d+)?$/;
 
 module.exports = {
    	name: "roll",
-	async execute(interaction, message) {
+		async execute(message) {
+			message.reply("ohs noes. dis is bwoken wight now. soz")
+			return
+
         let originalInteraction = interaction;
         let originalMessage = message;
         let fullRoll = null;

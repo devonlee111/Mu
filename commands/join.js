@@ -1,36 +1,21 @@
-const { joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
-
 module.exports = {
 	name: "join",
-	async execute(guildInfo, message) {
-		let guildID = message.guildId;
-        let channel = message.member.voice.channel;
-		let connection = undefined;
+	async execute(message, player) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong");
+			return;
+		}
+
+		let queue = player.createQueue(message.guild);
+				
+		// verify vc connection
 		try {
-			connection = joinChannel(channel);
-			guildInfo.audioInfo.connection = connection;
+			await queue.connect(message.member.voice.channel);
 		} catch(e) {
-			message.reply("failed to join voice channel: " + e.message);
+			console.log(e.message);
+			message.reply("oh no. I can't join the vc");
+			queue.destroy();
+			return;
 		}
     },
-	joinChannel,
 };
-
-function joinChannel(channel) {
-	if (channel == null) {
-		throw new Error("user not connected to a voice channel.");
-	} 
-	
-	let connection = joinVoiceChannel({
-    	channelId: channel.id,
-		guildId: channel.guild.id,
-		adapterCreator: channel.guild.voiceAdapterCreator,
-	});
-
-	connection.on('stateChange', (oldState, newState) => {
-		console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
-	});
-
-	return connection;
-}
-

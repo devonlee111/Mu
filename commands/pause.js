@@ -1,17 +1,16 @@
-const { getVoiceConnection } = require('@discordjs/voice');
-const { youtubeAPI } = require('../config.json');
-
 module.exports = {
     name: "pause",
-    async execute(guildInfo, message) {
-		if (guildInfo.audioInfo.subscription == null) {
-			message.reply("Not currently playing audio.");
+    async execute(message, player = undefined) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong")
 			return
 		}
-
-		let player = guildInfo.audioInfo.subscription.player;
-
-		player.pause();
+		
+		let queue = player.getQueue(message.guild);
+		if (queue != undefined) {
+			queue.setPaused(true);
+		} else {
+			console.log("there is no queue to pause");
+		}
     },
 };
-

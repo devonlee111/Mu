@@ -9,10 +9,10 @@ curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo apt install -y build-essential
 
-npm install ytdl-core
-npm install youtube-sr
 npm install discord.js
+npm install discord-player@dev
 npm install @discordjs/rest discord-api-types
 npm install @discordjs/builders
 npm install @discordjs/voice libsodium-wrappers
 npm install @discordjs/opus
+

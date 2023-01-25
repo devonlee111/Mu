@@ -1,29 +1,23 @@
 module.exports = {
 	name: "loop",
-    async execute(guildInfo, message) {
-		let audioInfo = guildInfo.audioInfo;
-
-		let loopType = "one";
-		if (audioInfo.loopType == loopType) {
-			loopType = "none";
+    async execute(message, player) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong");
+			return;
 		}
 
-		audioInfo.changeLoopType(loopType);
-		console.log(loopType);
-
-    	switch(audioInfo.loopType) {
-			case "one":
-				message.reply("now looping current audio");
-				break;
-
-			case "all":
-				message.reply("now looping entire queue");
-				break;
-
-			case "none":
-				message.reply("no longer looping");
-				break;
+		let queue = player.getQueue(message.guild);
+		if (queue != undefined) {
+			if (queue.repeatMode == 1) {
+				console.log("alright. will stop looping current track");
+				queue.setRepeatMode(0);
+			} else {
+				console.log("ok. looping current track");
+				queue.setRepeatMode(1);
+			}
+		} else {
+			message.reply("hmm... nothing's playing, can't loop");
+			console.log("no queue to loop");
 		}
-	}
+	},
 };
-

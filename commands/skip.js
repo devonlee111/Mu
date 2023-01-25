@@ -1,11 +1,17 @@
-const play = require('./play.js');
-const stop = require('./stop.js');
-
 module.exports = {
     name: "skip",
-    async execute(guildInfo, message) {
-		play.playNext(guildInfo.audioInfo);
-    	message.reply("skipping to next song...");
+    async execute(message, player) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong");
+			return;
+		}
+
+		let queue = player.getQueue(message.guild);
+		if (queue != undefined) {
+			queue.forceNext();
+		} else {
+			console.log("no queue to skip");
+		}
 	}
 };
 

@@ -1,16 +1,18 @@
-const { getVoiceConnection } = require('@discordjs/voice');
-
 module.exports = {
-    name: "stop",
-    async execute(guildInfo, message) {
-		if (guildInfo.audioInfo.subscription == null) {
-			message.reply("Not currently playing audio.");
+	name: "stop",
+	async execute(message, player) {
+		if (player == undefined) {
+			message.reply("oopsie-doodle. something's gone terrible wrong");
 			return;
 		}
 
-		let player = guildInfo.audioInfo.subscription.player;
-		guildInfo.audioInfo.loopType = "none";
-		player.stop();
-    },
+		let queue = player.getQueue(message.guild);
+		if (queue != undefined) {
+			queue.clear();
+			queue.skip();
+		} else {
+			console.log("no queue to stop");
+		}
+	},
 };
 

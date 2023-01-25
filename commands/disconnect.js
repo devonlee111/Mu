@@ -1,17 +1,16 @@
-const { getVoiceConnection } = require('@discordjs/voice');
-const { SlashCommandBuilder } = require('@discordjs/builders');
-
 module.exports = {
     name: 'disconnect',
-    async execute(guildInfo, message) {
-		let audioInfo = guildInfo.audioInfo;
-        let connection = getVoiceConnection(message.guildId)
-        if (connection == null) {
-			message.reply("not currently connected");
+    async execute(message, player) {
+        if (player == undefined) {
+            message.reply("oopsie-doodle. something's gone terrible wrong");
+            return;
         }
-
-        audioInfo.reset();
-		connection.destroy();
+  
+        let queue = player.getQueue(message.guild);
+        if (queue != undefined) {
+            queue.destroy(true);
+        } else {
+            console.log("no queue to disconnect")
+        }
     },
 };
-

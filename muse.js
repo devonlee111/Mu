@@ -1,39 +1,103 @@
 // Require the necessary discord.js classes
-const fs = require('fs')
-const { Client, Collection, Intents } = require('discord.js');
+const fs = require('fs');
+const path = require('node:path');
+const { Client, GatewayIntentBits, Collection, NewsChannel} = require('discord.js');
+const { Player } = require('discord-player');
 const { token } = require('./config.json');
-const guilds = require('./common/guilds.js')
+
+// ========== BOT SETUP ========== //
 
 // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.DIRECT_MESSAGES] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, 
+        GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent
+    ]
+});
 
+// Load commands from command directory
+const commandPrefix = '^';
 client.commands = new Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    // Set a new item in the Collection
-    // With the key as the command name and the value as the exported module
-   	client.commands.set(command.name, command);
+    let filePath = path.join(commandsPath, file);
+    let command = require(filePath);
+    // Check that potential command has the "execute" function
+   	if ('execute' in command) {
+        // Set a new item in the Collection with the key as the command name and the value as the exported module
+        client.commands.set(command.name, command);
+    } else {
+        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+    }
 }
 
-const prefix = '!'
-const guildMap = new Map();
+// Setup discord player
+const options = {
+	filter: "audioonly",
+	quality: "highestaudio",
+	highWaterMark: 1 << 25
+}
+const player = new Player(client, {
+	ytdlOptions: options
+});
+
+console.log("Mμse bot setup complete");
+
+// ========== DISCORD PLAYER SETUP ========== //
+
+// Handle player errors
+player.on('error', (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
+})
+
+// Handle player connection errors
+player.on('connectionError', (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
+})
+
+player.on("trackStart", (queue, track) => {
+    console.log(`now playing ${track.title}`)
+    // queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`)
+});
+
+/*
+player.on('trackEnd', (queue, track) => {
+    console.log(`${track.title} just ended`);
+    console.log(queue.playing);
+    queue.play();
+});
+*/
+
+player.on('queueEnd', (queue) => {
+    console.log(queue.nowPlaying());
+    console.log("queue has ended");
+});
+
+player.on('channelEmpty', (queue) => {
+    queue.destroy(true);
+    console.log("I'm all alone. disconnecting...");
+});
+
+/*
+player.on("voiceStateUpdate", (queue, oldState, newState) => {
+    console.log("voice state just transitioned from " + oldState.streaming + " to " + newState.streaming)
+});
+*/
+
+// ========== BOT RUNTIME ========== //
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
+    console.log(`Logged in as ${client.user.tag}!`);
+  });
 
 // Check new messages for command prefix and handle accordingly
 client.on('messageCreate', async message => {
-    if (message.content.startsWith(prefix)) {
-		var guildID = message.guildId;
-		if (!isKnownGuild(guildID)) {
-			console.log("unknown guild: adding to known guilds");
-			addGuildToMap(guildID);
-		}
-
+    console.log("detected message: " + message.content);
+    if (message.content.startsWith(commandPrefix)) {
+        // Parse out given command
         var content = message.content.substring(1);
         var spaceIndex = content.indexOf(" ");
         var cmd = "";
@@ -53,20 +117,10 @@ client.on('messageCreate', async message => {
             return message.reply('That is not a command.');
         }
 
-		guildInfo = guildMap.get(guildID);
-	    command.execute(guildInfo, message)
+        // execute the command
+	    command.execute(message, player);
     }
 });
 
-function isKnownGuild(guildID) {
-	return guildMap.has(guildID);
-}
-
-function addGuildToMap(guildID) {
-	guildEntry = new guilds.GuildInfo();
-	guildMap.set(guildID, guildEntry);	
-}
-
 // Login to Discord with client token
 client.login(token);
-
