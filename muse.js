@@ -81,8 +81,8 @@ client.once('ready', () => {
 
 // Check new messages for command prefix and handle accordingly
 client.on('messageCreate', async message => {
-    console.log("detected message: " + message.content);
     if (message.content.startsWith(commandPrefix)) {
+        console.log("detected command: " + message.content);
         // Parse out given command
         var content = message.content.substring(1);
         var spaceIndex = content.indexOf(" ");
