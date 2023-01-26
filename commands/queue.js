@@ -11,21 +11,24 @@ module.exports = {
 		query = message.content.trim();
 		if (query != "") {
 			let queue = player.createQueue(message.guild);
-			let song = await player.search(query, {
+			let search = await player.search(query, {
 				requestedBy: message.author
 			});
 
-			if (!song) {
+			if (!search) {
 				message.reply("whoops. I wasn't able to find that for you");
 				return;
 			}
 
-			if (song.playlist) {
-				queue.addTracks(song.tracks);
+			if (search.playlist) {
+				queue.addTracks(search.tracks);
+				embedMessage = createDiscordQueuePlaylistEmbed(search.playlist);
+				message.channel.send({ embeds: [embedMessage] });
 			} else {
-				queue.addTrack(song.tracks[0]);
+				queue.addTrack(search.tracks[0]);
+				embedMessage = createDiscordQueueMediaEmbed(search.tracks[0])
+				message.channel.send({ embeds: [embedMessage] });
 			}
-
 		} else {
 			let queue = player.getQueue(message.guild);
 			if (queue != undefined) {
@@ -34,7 +37,6 @@ module.exports = {
 			} else {
 				message.reply("you didn't specify something for me to queue");
 			}
-			
 		}
 	},
 };
@@ -75,33 +77,32 @@ function createDiscordQueueEmbed(queue) {
 	return queueEmbed;
 }
 
-/*
 // Creates a discord embed for queueing a specific media entry
-function createDiscordQueueMediaEmbed(entry) {
-	let entryEmbed = new MessageEmbed()
+function createDiscordQueueMediaEmbed(track) {
+	let entryEmbed = new EmbedBuilder()
 		.setColor('#ffc5f7')
 		.setTitle('Media Queued')
 		.setDescription('Queueing requested media')
 		.addFields(
-			{ name: 'Title', value: entry.title, inline: true },
-			{ name: 'Uploader', value: entry.channel, inline: true },
-			{ name: 'Duration', value: entry.duration, inline: true },
+			{ name: 'Title', value: track.title, inline: true },
+			{ name: 'Uploader', value: track.author, inline: true },
+			{ name: 'Duration', value: track.duration, inline: true },
 			{ name: '\u200B', value: '\u200B' },
 		)
 		.setTimestamp()
-		.setFooter({ text: entry.url });
+		.setFooter({ text: track.url });
 
 	return entryEmbed;
 }
 
 function createDiscordQueuePlaylistEmbed(playlist) {
-	var playlistEmbed = new MessageEmbed()
+	var playlistEmbed = new EmbedBuilder()
 		.setColor('#ffc5f7')
 		.setTitle('Playlist Queued')
 		.setDescription('Queueing requested playlist')
 		.addFields(
 			{ name: 'Title', value: playlist.title, inline: true },
-			{ name: 'Length', value: playlist.videoCount.toString(), inline: true },
+			{ name: 'Length', value: playlist.tracks.length.toString(), inline: true },
 			{ name: '\u200B', value: '\u200B' },
 		)
 		.setTimestamp()
@@ -109,4 +110,3 @@ function createDiscordQueuePlaylistEmbed(playlist) {
 
 	return playlistEmbed;
 }
-*/
