@@ -62,14 +62,6 @@ player.on("trackStart", (queue, track) => {
     // queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`)
 });
 
-/*
-player.on('trackEnd', (queue, track) => {
-    console.log(`${track.title} just ended`);
-    console.log(queue.playing);
-    queue.play();
-});
-*/
-
 player.on('queueEnd', (queue) => {
     console.log(queue.nowPlaying());
     console.log("queue has ended");
@@ -79,12 +71,6 @@ player.on('channelEmpty', (queue) => {
     queue.destroy(true);
     console.log("I'm all alone. disconnecting...");
 });
-
-/*
-player.on("voiceStateUpdate", (queue, oldState, newState) => {
-    console.log("voice state just transitioned from " + oldState.streaming + " to " + newState.streaming)
-});
-*/
 
 // ========== BOT RUNTIME ========== //
 

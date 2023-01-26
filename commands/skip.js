@@ -9,6 +9,7 @@ module.exports = {
 		let queue = player.getQueue(message.guild);
 		if (queue != undefined) {
 			queue.forceNext();
+			message.reply("skipping to next track...")
 		} else {
 			console.log("no queue to skip");
 		}

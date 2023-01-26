@@ -16,7 +16,7 @@ module.exports = {
 				queue.setRepeatMode(1);
 			}
 		} else {
-			message.reply("hmm... nothing's playing, can't loop");
+			message.reply("hmm... nothing's queued or playing, can't loop");
 			console.log("no queue to loop");
 		}
 	},

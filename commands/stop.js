@@ -10,6 +10,7 @@ module.exports = {
 		if (queue != undefined) {
 			queue.clear();
 			queue.skip();
+			message.reply("ok, stopping...")
 		} else {
 			console.log("no queue to stop");
 		}

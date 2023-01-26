@@ -1,6 +1,8 @@
 module.exports = {
     name: "ping",
     async execute(message) {
-        message.reply("Pong!");
+        let now = new Date();
+        let lagTime = (now - message.createdAt);
+        message.reply("Pong! " + "`" + lagTime + "ms`");
     },
 };

@@ -1,3 +1,5 @@
+const embeds = require('../common/embeds.js')
+
 module.exports = {
 	name: "play",
 	// 1.  Queue any media provided by user
@@ -48,8 +50,12 @@ module.exports = {
 
 			if (song.playlist) {
 				queue.addTracks(song.tracks);
+				embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
+				message.channel.send({ embeds: [embedMessage] });
 			} else {
-			queue.addTrack(song.tracks[0]);
+				queue.addTrack(song.tracks[0]);
+				embedMessage = embeds.createDiscordQueueMediaEmbed(search.tracks[0])
+				message.channel.send({ embeds: [embedMessage] });
 			}
 
 			if (!queue.playing) {

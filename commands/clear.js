@@ -9,6 +9,7 @@ module.exports = {
         let queue = player.getQueue(message.guild);
         if (queue != undefined) {
             queue.clear();
+            message.reply("ok, clearing the rest of the queue");
         } else {
             console.log("no queue to clear");
         }
