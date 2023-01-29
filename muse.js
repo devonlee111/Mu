@@ -16,7 +16,7 @@ const client = new Client({
 });
 
 // Load commands from command directory
-const commandPrefix = '^';
+const commandPrefix = '!';
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));

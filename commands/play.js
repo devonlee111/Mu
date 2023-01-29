@@ -27,7 +27,7 @@ module.exports = {
 				console.log(queue.playing);
 			}
 
-			let song = await player.search(query, {
+			let search = await player.search(query, {
 				requestedBy: message.author
 			});
 				
@@ -43,17 +43,17 @@ module.exports = {
 				}
 			}
 
-			if (!song) {
+			if (!search) {
 				message.reply("whoops. I wasn't able to find that for you");
 				return;
 			}
 
-			if (song.playlist) {
-				queue.addTracks(song.tracks);
+			if (search.playlist) {
+				queue.addTracks(search.tracks);
 				embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
 				message.channel.send({ embeds: [embedMessage] });
 			} else {
-				queue.addTrack(song.tracks[0]);
+				queue.addTrack(search.tracks[0]);
 				embedMessage = embeds.createDiscordQueueMediaEmbed(search.tracks[0])
 				message.channel.send({ embeds: [embedMessage] });
 			}
