@@ -1,4 +1,4 @@
-const embeds = require('../common/embeds.js')
+const embeds = require("../common/embeds.js");
 
 module.exports = {
 	name: "play",
@@ -11,34 +11,38 @@ module.exports = {
 			return;
 		}
 
-		query = message.content.trim();
+		let query = message.content.trim();
 		if (query != "") {
-			let queue = player.getQueue(message.guild);
+			let queue = player.nodes.get(message.guild);
 			if (queue == undefined) {
-				options = {
+				queue = queue = player.nodes.create({
+					metadata: {
+						channel: interaction.channel,
+						client: interaction.guild.members.me,
+						requestedBy: interaction.user,
+					},
+					selfDeaf: true,
+					volume: 80,
+					leaveOnEmpty: true,
 					leaveOnEnd: false,
-    				leaveOnEndCooldown: 1,
-    				leaveOnStop: false,
-    				leaveOnEmpty: false,
-				}
-				queue = player.createQueue(message.guild, options);
+				});
 			} else {
-				queue = player.getQueue(message.guild);
-				console.log(queue.playing);
+				queue = player.nodes.get(message.guild);
+				console.log(queue.node.isPlaying);
 			}
 
 			let search = await player.search(query, {
-				requestedBy: message.author
+				requestedBy: message.author,
 			});
-				
+
 			// verify vc connection
 			if (queue.connection == undefined) {
 				try {
 					await queue.connect(message.member.voice.channel);
-				} catch(e) {
+				} catch (e) {
 					console.log(e.message);
 					message.reply("oh no. I can't join the vc");
-					queue.destroy();
+					queue.delete();
 					return;
 				}
 			}
@@ -48,22 +52,23 @@ module.exports = {
 				return;
 			}
 
+			let tracks = undefined;
+			let embedMessage = undefined;
 			if (search.playlist) {
-				queue.addTracks(search.tracks);
-				embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
-				message.channel.send({ embeds: [embedMessage] });
+				tracks = search.tracks;
+				embedMessage = embeds.createDiscordQueuePlaylistEmbed(tracks);
 			} else {
-				queue.addTrack(search.tracks[0]);
-				embedMessage = embeds.createDiscordQueueMediaEmbed(search.tracks[0])
-				message.channel.send({ embeds: [embedMessage] });
+				tracks = search.tracks[0];
+				embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
 			}
+			queue.addTrack(tracks);
+			message.channel.send({ embeds: [embedMessage] });
 
-			if (!queue.playing) {
-				queue.playing = true;
-				await queue.play();
+			if (!queue.node.isPlaying()) {
+				await queue.node.play();
 			}
 		} else {
-			let queue = player.getQueue(message.guild);
+			let queue = player.nodes.get(message.guild);
 			if (queue == undefined) {
 				message.reply("you didn't specify something for me to play");
 			} else {
@@ -71,20 +76,20 @@ module.exports = {
 				if (queue.connection == undefined) {
 					try {
 						await queue.connect(message.member.voice.channel);
-					} catch(e) {
+					} catch (e) {
 						console.log(e.message);
 						message.reply("oh no. I can't join the vc");
-						queue.destroy();
+						queue.delete();
 						return;
 					}
 				}
 				if (!queue.playing) {
 					console.log("not playing anything, begin playing");
-					queue.playing = true;
-					await queue.play();
+					queue.node.isPlaying = true;
+					await queue.node.play();
 				} else {
-					if (queue.connection.paused) {
-						queue.setPaused(false);
+					if (queue.node.isPaused()) {
+						queue.node.resume();
 					}
 				}
 			}

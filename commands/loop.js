@@ -1,12 +1,12 @@
 module.exports = {
 	name: "loop",
-    async execute(message, player) {
+	async execute(message, player) {
 		if (player == undefined) {
 			message.reply("oopsie-doodle. something's gone terrible wrong");
 			return;
 		}
 
-		let queue = player.getQueue(message.guild);
+		let queue = player.nodes.get(message.guild);
 		if (queue != undefined) {
 			if (queue.repeatMode == 1) {
 				console.log("alright. will stop looping current track");

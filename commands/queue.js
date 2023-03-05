@@ -1,4 +1,4 @@
-const embeds = require('../common/embeds.js')
+const embeds = require("../common/embeds.js");
 
 module.exports = {
 	name: "queue",
@@ -10,9 +10,9 @@ module.exports = {
 
 		query = message.content.trim();
 		if (query != "") {
-			let queue = player.createQueue(message.guild);
+			let queue = player.nodes.get(message.guild);
 			let search = await player.search(query, {
-				requestedBy: message.author
+				requestedBy: message.author,
 			});
 
 			if (!search) {
@@ -20,17 +20,19 @@ module.exports = {
 				return;
 			}
 
+			let tracks = undefined;
+			let embedMessage = undefined;
 			if (search.playlist) {
-				queue.addTracks(search.tracks);
-				embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
-				message.channel.send({ embeds: [embedMessage] });
+				tracks = search.tracks;
+				embedMessage = embeds.createDiscordQueuePlaylistEmbed(tracks);
 			} else {
-				queue.addTrack(search.tracks[0]);
-				embedMessage = embeds.createDiscordQueueMediaEmbed(search.tracks[0])
-				message.channel.send({ embeds: [embedMessage] });
+				tracks = search.tracks[0];
+				embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
 			}
+			queue.addTrack(tracks);
+			message.channel.send({ embeds: [embedMessage] });
 		} else {
-			let queue = player.getQueue(message.guild);
+			let queue = player.nodes.get(message.guild);
 			if (queue != undefined) {
 				embedMessage = embeds.createDiscordQueueEmbed(queue);
 				message.channel.send({ embeds: [embedMessage] });

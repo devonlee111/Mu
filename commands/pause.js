@@ -1,16 +1,16 @@
 module.exports = {
-    name: "pause",
-    async execute(message, player = undefined) {
+	name: "pause",
+	async execute(message, player = undefined) {
 		if (player == undefined) {
-			message.reply("oopsie-doodle. something's gone terrible wrong")
-			return
+			message.reply("oopsie-doodle. something's gone terrible wrong");
+			return;
 		}
-		
-		let queue = player.getQueue(message.guild);
+
+		let queue = player.nodes.get(message.guild);
 		if (queue != undefined) {
-			queue.setPaused(true);
+			queue.node.pause();
 		} else {
 			console.log("there is no queue to pause");
 		}
-    },
+	},
 };

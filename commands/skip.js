@@ -1,18 +1,17 @@
 module.exports = {
-    name: "skip",
-    async execute(message, player) {
+	name: "skip",
+	async execute(message, player) {
 		if (player == undefined) {
 			message.reply("oopsie-doodle. something's gone terrible wrong");
 			return;
 		}
 
-		let queue = player.getQueue(message.guild);
+		let queue = player.nodes.get(message.guild);
 		if (queue != undefined) {
-			queue.forceNext();
-			message.reply("skipping to next track...")
+			queue.node.skip();
+			message.reply("skipping to next track...");
 		} else {
 			console.log("no queue to skip");
 		}
-	}
+	},
 };
-

@@ -6,16 +6,16 @@ module.exports = {
 			return;
 		}
 
-		let queue = player.createQueue(message.guild);
-				
+		let queue = player.nodes.get(message.guild);
+
 		// verify vc connection
 		try {
 			await queue.connect(message.member.voice.channel);
-		} catch(e) {
+		} catch (e) {
 			console.log(e.message);
 			message.reply("oh no. I can't join the vc");
 			queue.destroy();
 			return;
 		}
-    },
+	},
 };
