@@ -7,11 +7,12 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			queue.node.skip();
-			message.reply("skipping to next track...");
-		} else {
-			console.log("no queue to skip");
+		if (queue == undefined) {
+			message.reply("There is no queue to skip through");
+			return;
 		}
+
+		queue.node.skip();
+		message.reply("skipping to next track...");
 	},
 };

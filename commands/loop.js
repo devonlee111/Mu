@@ -7,17 +7,17 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			if (queue.repeatMode == 1) {
-				console.log("alright. will stop looping current track");
-				queue.setRepeatMode(0);
-			} else {
-				console.log("ok. looping current track");
-				queue.setRepeatMode(1);
-			}
+		if (queue == undefined) {
+			message.reply("There is nothing playing for me to loop");
+			return;
+		}
+
+		if (queue.repeatMode == 1) {
+			message.reply("alright. will stop looping current track");
+			queue.setRepeatMode(0);
 		} else {
-			message.reply("hmm... nothing's queued or playing, can't loop");
-			console.log("no queue to loop");
+			message.reply("ok. looping current track");
+			queue.setRepeatMode(1);
 		}
 	},
 };

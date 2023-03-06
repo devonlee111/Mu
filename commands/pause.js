@@ -7,10 +7,12 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			queue.node.pause();
-		} else {
-			console.log("there is no queue to pause");
+		if (queue == undfined) {
+			message.reply("there is no queue to pause");
+			return;
 		}
+
+		queue.node.pause();
+		message.reply("playback is paused");
 	},
 };

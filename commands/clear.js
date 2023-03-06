@@ -7,11 +7,12 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			queue.tracks.clear();
-			message.reply("ok, clearing the rest of the queue");
-		} else {
-			console.log("no queue to clear");
+		if (queue == undefined) {
+			message.reply("No queue for me to clear");
+			return;
 		}
+
+		queue.tracks.clear();
+		message.reply("ok, clearing the rest of the queue");
 	},
 };

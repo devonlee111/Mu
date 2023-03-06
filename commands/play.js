@@ -1,4 +1,5 @@
 const embeds = require("../common/embeds.js");
+const tools = require("../common/tools.js");
 
 module.exports = {
 	name: "play",
@@ -12,40 +13,39 @@ module.exports = {
 		}
 
 		let query = message.content.trim();
-		if (query != "") {
-			let queue = player.nodes.get(message.guild);
-			if (queue == undefined) {
-				queue = player.nodes.create(message.guild, {
-					metadata: {
-						channel: message.channel,
-						client: message.guild.members.me,
-						requestedBy: message.author,
-					},
-					selfDeaf: true,
-					volume: 80,
-					leaveOnEmpty: true,
-					leaveOnEnd: false,
-				});
-			} else {
-				queue = player.nodes.get(message.guild);
-				console.log(queue.node.isPlaying);
-			}
+		let queue = player.nodes.get(message.guild);
 
+		// Get existing or create a new queue
+		if (queue == undefined) {
+			queue = tools.createQueue(message);
+		} else {
+			queue = player.nodes.get(message.guild);
+			console.log(queue.node.isPlaying);
+		}
+
+		if (!tools.ensureVoiceChannelConnection()) {
+			return;
+		}
+
+		// Handle empty query case
+		if (query == "" && queue.tracks.size == 0) {
+			message.reply("you didn't specify something for me to play");
+			return;
+		} else if (query == "" && queue.tracks.size > 0) {
+			if (!queue.node.isPlaying()) {
+				console.log("not playing anything, begin playing");
+				queue.node.isPlaying = true;
+				await queue.node.play();
+			} else if (queue.node.isPaused()) {
+				queue.node.resume();
+			}
+		}
+
+		// Handle non-empty query case
+		if (query != "") {
 			let search = await player.search(query, {
 				requestedBy: message.author,
 			});
-
-			// verify vc connection
-			if (queue.connection == undefined) {
-				try {
-					await queue.connect(message.member.voice.channel);
-				} catch (e) {
-					console.log(e.message);
-					message.reply("oh no. I can't join the vc");
-					queue.delete();
-					return;
-				}
-			}
 
 			if (!search) {
 				message.reply("whoops. I wasn't able to find that for you");
@@ -66,32 +66,6 @@ module.exports = {
 
 			if (!queue.node.isPlaying()) {
 				await queue.node.play();
-			}
-		} else {
-			let queue = player.nodes.get(message.guild);
-			if (queue == undefined) {
-				message.reply("you didn't specify something for me to play");
-			} else {
-				// verify vc connection
-				if (queue.connection == undefined) {
-					try {
-						await queue.connect(message.member.voice.channel);
-					} catch (e) {
-						console.log(e.message);
-						message.reply("oh no. I can't join the vc");
-						queue.delete();
-						return;
-					}
-				}
-				if (!queue.node.isPlaying()) {
-					console.log("not playing anything, begin playing");
-					queue.node.isPlaying = true;
-					await queue.node.play();
-				} else {
-					if (queue.node.isPaused()) {
-						queue.node.resume();
-					}
-				}
 			}
 		}
 	},

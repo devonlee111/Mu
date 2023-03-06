@@ -7,10 +7,12 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			queue.delete(true);
-		} else {
-			console.log("no queue to disconnect");
+		if (queue == undefined) {
+			message.reply("I'm not currently connected");
+			return;
 		}
+
+		queue.delete(true);
+		message.reply("goodbye");
 	},
 };

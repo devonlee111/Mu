@@ -7,12 +7,13 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue != undefined) {
-			queue.tracks.clear();
-			queue.tracks.skip();
-			message.reply("ok, stopping...");
-		} else {
-			console.log("no queue to stop");
+		if (queue == undefined) {
+			message.reply("There is no queue to stop");
+			return;
 		}
+
+		queue.tracks.clear();
+		queue.tracks.skip();
+		message.reply("ok, stopping...");
 	},
 };

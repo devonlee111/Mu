@@ -8,27 +8,9 @@ module.exports = {
 
 		let queue = player.nodes.get(message.guild);
 		if (queue == undefined) {
-			queue = player.nodes.create(message.guild, {
-				metadata: {
-					channel: message.channel,
-					client: message.guild.members.me,
-					requestedBy: message.author,
-				},
-				selfDeaf: true,
-				volume: 80,
-				leaveOnEmpty: true,
-				leaveOnEnd: false,
-			});
+			queue = tools.createQueue(message);
 		}
 
-		// verify vc connection
-		try {
-			await queue.connect(message.member.voice.channel);
-		} catch (e) {
-			console.log(e.message);
-			message.reply("oh no. I can't join the vc");
-			queue.delete();
-			return;
-		}
+		tools.ensureVoiceChannelConnection();
 	},
 };
