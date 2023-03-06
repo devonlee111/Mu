@@ -13,7 +13,7 @@ module.exports = {
 		}
 
 		queue.tracks.clear();
-		queue.tracks.skip();
+		queue.node.skip();
 		message.reply("ok, stopping...");
 	},
 };
