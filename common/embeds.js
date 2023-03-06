@@ -3,10 +3,8 @@ const { EmbedBuilder } = require("discord.js");
 module.exports = {
 	// Creates a discord embed for showing the current queue
 	createDiscordQueueEmbed(queue) {
-		nowPlaying = undefined;
-		if (queue.node.isPlaying()) {
-			nowPlaying = queue.nowPlaying();
-		}
+		let currentTrack = queue.currnetTrack;
+
 		let queueEmbed = new EmbedBuilder()
 			.setColor("#ffc5f7")
 			.setTitle("Current Queue")
@@ -19,7 +17,7 @@ module.exports = {
 		if (queue.tracks.size == 0) {
 			queueString = "Queue Empty";
 		} else {
-			if (nowPlaying) {
+			if (currentTrack != undefined) {
 				queueString = "**>** " + nowPlaying.title + " **<**\n";
 			}
 			for (var i = 0; i < queue.tracks.size; i++) {

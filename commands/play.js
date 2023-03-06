@@ -23,50 +23,50 @@ module.exports = {
 			console.log(queue.node.isPlaying);
 		}
 
-		if (!tools.ensureVoiceChannelConnection(queue, message)) {
+		if (!(await tools.ensureVoiceChannelConnection(queue, message))) {
 			return;
 		}
 
 		// Handle empty query case
-		if (query == "" && queue.tracks.size == 0) {
-			message.reply("you didn't specify something for me to play");
-			return;
-		} else if (query == "" && queue.tracks.size > 0) {
-			if (!queue.node.isPlaying()) {
-				console.log("not playing anything, begin playing");
-				queue.node.isPlaying = true;
-				await queue.node.play();
-			} else if (queue.node.isPaused()) {
+		if (query == "") {
+			if (queue.node.isPaused()) {
 				queue.node.resume();
-			}
-		}
-
-		// Handle non-empty query case
-		if (query != "") {
-			let search = await player.search(query, {
-				requestedBy: message.author,
-			});
-
-			if (!search) {
-				message.reply("whoops. I wasn't able to find that for you");
 				return;
 			}
 
-			let tracks = undefined;
-			let embedMessage = undefined;
-			if (search.playlist) {
-				tracks = search.tracks;
-				embedMessage = embeds.createDiscordQueuePlaylistEmbed(tracks);
-			} else {
-				tracks = search.tracks[0];
-				embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
+			if (queue.isEmpty()) {
+				message.reply("you didn't specify something for me to play");
 			}
-			queue.addTrack(tracks);
-			message.channel.send({ embeds: [embedMessage] });
 
-			if (!queue.node.isPlaying()) {
-				await queue.node.play();
-			}
+			console.log("not playing anything, begin playing");
+			queue.node.isPlaying = true;
+			await queue.node.play();
+		}
+
+		// Handle non-empty query case
+		let search = await player.search(query, {
+			requestedBy: message.author,
+		});
+
+		if (!search) {
+			message.reply("whoops. I wasn't able to find that for you");
+			return;
+		}
+
+		let tracks = undefined;
+		let embedMessage = undefined;
+		if (search.playlist) {
+			tracks = search.tracks;
+			embedMessage = embeds.createDiscordQueuePlaylistEmbed(tracks);
+		} else {
+			tracks = search.tracks[0];
+			embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
+		}
+		queue.addTrack(tracks);
+		message.channel.send({ embeds: [embedMessage] });
+
+		if (!queue.node.isPlaying()) {
+			await queue.node.play();
 		}
 	},
 };

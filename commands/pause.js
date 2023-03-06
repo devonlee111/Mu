@@ -7,7 +7,7 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
-		if (queue == undfined) {
+		if (queue == undefined) {
 			message.reply("there is no queue to pause");
 			return;
 		}

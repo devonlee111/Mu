@@ -13,6 +13,6 @@ module.exports = {
 			queue = tools.createQueue(player, message);
 		}
 
-		tools.ensureVoiceChannelConnection(queue, message);
+		await tools.ensureVoiceChannelConnection(queue, message);
 	},
 };
