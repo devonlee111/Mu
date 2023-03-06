@@ -23,7 +23,7 @@ module.exports = {
 			console.log(queue.node.isPlaying);
 		}
 
-		if (!tools.ensureVoiceChannelConnection()) {
+		if (!tools.ensureVoiceChannelConnection(queue, message)) {
 			return;
 		}
 
