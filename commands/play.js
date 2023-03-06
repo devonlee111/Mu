@@ -15,11 +15,11 @@ module.exports = {
 		if (query != "") {
 			let queue = player.nodes.get(message.guild);
 			if (queue == undefined) {
-				queue = queue = player.nodes.create({
+				queue = player.nodes.create({
 					metadata: {
-						channel: interaction.channel,
-						client: interaction.guild.members.me,
-						requestedBy: interaction.user,
+						channel: message.channel,
+						client: message.guild.members.me,
+						requestedBy: message.user,
 					},
 					selfDeaf: true,
 					volume: 80,

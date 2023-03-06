@@ -7,6 +7,19 @@ module.exports = {
 		}
 
 		let queue = player.nodes.get(message.guild);
+		if (queue == undefined) {
+			queue = player.nodes.create({
+				metadata: {
+					channel: message.channel,
+					client: message.guild.members.me,
+					requestedBy: message.user,
+				},
+				selfDeaf: true,
+				volume: 80,
+				leaveOnEmpty: true,
+				leaveOnEnd: false,
+			});
+		}
 
 		// verify vc connection
 		try {
@@ -14,7 +27,7 @@ module.exports = {
 		} catch (e) {
 			console.log(e.message);
 			message.reply("oh no. I can't join the vc");
-			queue.destroy();
+			queue.delete();
 			return;
 		}
 	},
