@@ -83,7 +83,7 @@ module.exports = {
 						return;
 					}
 				}
-				if (!queue.playing) {
+				if (!queue.node.isPlaying()) {
 					console.log("not playing anything, begin playing");
 					queue.node.isPlaying = true;
 					await queue.node.play();
