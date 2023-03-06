@@ -17,7 +17,8 @@ apt install npm
 apt install -y build-essential
 
 npm install discord.js
-npm install discord-player@dev
+npm install discord-player
+npm install @discord-player/extractor
 npm install @discordjs/rest discord-api-types
 npm install @discordjs/builders
 npm install @discordjs/voice libsodium-wrappers
