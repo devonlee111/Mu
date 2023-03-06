@@ -8,7 +8,7 @@ module.exports = {
 
 		let queue = player.nodes.get(message.guild);
 		if (queue == undefined) {
-			queue = tools.createQueue(message);
+			queue = tools.createQueue(player, message);
 		}
 
 		tools.ensureVoiceChannelConnection();

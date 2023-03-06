@@ -17,7 +17,7 @@ module.exports = {
 
 		// Get existing or create a new queue
 		if (queue == undefined) {
-			queue = tools.createQueue(message);
+			queue = tools.createQueue(player, message);
 		} else {
 			queue = player.nodes.get(message.guild);
 			console.log(queue.node.isPlaying);

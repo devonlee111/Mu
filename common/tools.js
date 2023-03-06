@@ -1,5 +1,5 @@
 module.exports = {
-	createQueue(message) {
+	createQueue(player, message) {
 		queue = player.nodes.create(message.guild, {
 			metadata: {
 				channel: message.channel,
