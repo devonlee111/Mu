@@ -1,3 +1,5 @@
+const tools = require("../common/tools.js");
+
 module.exports = {
 	name: "join",
 	async execute(message, player) {

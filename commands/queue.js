@@ -1,4 +1,5 @@
 const embeds = require("../common/embeds.js");
+const tools = require("../common/tools.js");
 
 module.exports = {
 	name: "queue",
