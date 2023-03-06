@@ -10,14 +10,7 @@ module.exports = {
 		}
 
 		query = message.content.trim();
-
-		let queue = player.nodes.get(message.guild);
-		if (queue == undefined) {
-			queue = tools.createQueue(player, message);
-		} else {
-			queue = player.nodes.get(message.guild);
-			console.log(queue.node.isPlaying);
-		}
+		let queue = tools.ensureGetQueue(player, message);
 
 		if (query == "") {
 			let embedMessage = embeds.createDiscordQueueEmbed(queue);
