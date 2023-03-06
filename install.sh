@@ -13,7 +13,6 @@ apt install -y curl
 apt install -y ffmpeg
 curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
 apt install -y nodejs
-apt install npm
 apt install -y build-essential
 
 npm install discord.js
