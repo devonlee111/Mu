@@ -14,12 +14,10 @@ module.exports = {
 		let queueString = "";
 
 		// nothing currently playing and nothing in queue
-		if (queue.tracks.size == 0) {
+		if (queue.tracks.size == 0 && !currentTrack) {
 			queueString = "Queue Empty";
 		} else {
-			if (currentTrack != undefined) {
-				queueString = "**>** " + currentTrack.title + " **<**\n";
-			}
+			queueString = "**>** " + currentTrack.title + " **<**\n";
 			for (var i = 0; i < queue.tracks.size; i++) {
 				let rowString = "\n" + (i + 1) + ". " + queue.tracks.at(i).title + "\n";
 				queueString += rowString;
