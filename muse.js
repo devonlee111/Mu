@@ -51,9 +51,12 @@ const options = {
 	quality: "highestaudio",
 	highWaterMark: 1 << 25,
 };
+const player = Player.singleton(client);
+/*
 const player = new Player(client, {
 	ytdlOptions: options,
 });
+*/
 
 console.log("Mμse bot setup complete");
 
@@ -79,13 +82,16 @@ player.events.on("playerStart", (queue, track) => {
 });
 
 player.events.on("emptyQueue", (queue) => {
-	console.log(queue.nowPlaying());
 	console.log("queue has ended");
 });
 
 player.events.on("emptyChannel", (queue) => {
 	queue.destroy(true);
 	console.log("I'm all alone. disconnecting...");
+});
+
+player.events.on("debug", (queuen, debugMessage) => {
+	console.log(debugMessage);
 });
 
 // ========== BOT RUNTIME ========== //
