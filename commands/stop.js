@@ -12,6 +12,7 @@ module.exports = {
 			return;
 		}
 
+		queue.setRepeatMode(0);
 		queue.tracks.clear();
 		queue.node.skip();
 		message.reply("ok, stopping...");

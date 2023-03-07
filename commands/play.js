@@ -26,13 +26,12 @@ module.exports = {
 				return;
 			}
 
-			if (queue.isEmpty()) {
+			if (queue.isEmpty() || !queue.node.isPlaying) {
 				message.reply("you didn't specify something for me to play");
 				return;
 			}
 
 			console.log("not playing anything, begin playing");
-			queue.node.isPlaying = true;
 			await queue.node.play();
 			return;
 		}
