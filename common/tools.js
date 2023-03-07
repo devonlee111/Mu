@@ -13,7 +13,7 @@ module.exports = {
 		return true;
 	},
 	ensureGetQueue(player, message) {
-		player.nodes.get(message.guild);
+		let queue = player.nodes.get(message.guild);
 		if (queue == undefined) {
 			queue = createQueue(player, message);
 		} else {
