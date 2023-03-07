@@ -15,10 +15,4 @@ curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
 apt install -y nodejs
 apt install -y build-essential
 
-npm install discord.js
-npm install discord-player
-npm install @discord-player/extractor
-npm install @discordjs/rest discord-api-types
-npm install @discordjs/builders
-npm install @discordjs/voice libsodium-wrappers
-npm install @discordjs/opus
+npm install
