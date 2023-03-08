@@ -26,7 +26,7 @@ module.exports = {
 				return;
 			}
 
-			if (queue.isEmpty() || queue.node.isPlaying) {
+			if (queue.isEmpty() && !queue.currentTrack) {
 				message.reply("you didn't specify something for me to play");
 				return;
 			}
@@ -59,7 +59,12 @@ module.exports = {
 		message.channel.send({ embeds: [embedMessage] });
 
 		if (!queue.node.isPlaying()) {
-			await queue.node.play();
+			try {
+				await queue.node.play();
+			} catch (e) {
+				console.log(e.message);
+				message.reply(`failed to play that: ${e}`);
+			}
 		}
 	},
 };
