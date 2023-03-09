@@ -8,7 +8,7 @@ const {
 	NewsChannel,
 } = require("discord.js");
 const { Player } = require("discord-player");
-const { token } = require("./config.json");
+const { token, prefix, ytCookie } = require("./config.json");
 
 // ========== BOT SETUP ========== //
 
@@ -24,7 +24,6 @@ const client = new Client({
 });
 
 // Load commands from command directory
-const commandPrefix = "!";
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs
@@ -46,17 +45,21 @@ for (const file of commandFiles) {
 }
 
 // Setup discord player
-const options = {
-	filter: "audioonly",
-	quality: "highestaudio",
-	highWaterMark: 1 << 25,
-};
-const player = Player.singleton(client);
-/*
-const player = new Player(client, {
-	ytdlOptions: options,
+const player = Player.singleton(client, {
+	ytdlOptions: {
+		requestOptions: {
+			headers: {
+				cookie: ytCookie,
+			},
+		},
+		filter: "audioonly",
+		quality: "highestaudio",
+		highWaterMark: 1 << 62,
+		liveBuffer: 1 << 62,
+		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
+		bitrate: 128,
+	},
 });
-*/
 
 console.log("Mμse bot setup complete");
 
@@ -107,7 +110,7 @@ client.once("ready", () => {
 
 // Check new messages for command prefix and handle accordingly
 client.on("messageCreate", async (message) => {
-	if (message.content.startsWith(commandPrefix)) {
+	if (message.content.startsWith(prefix)) {
 		console.log("detected command: " + message.content);
 		// Parse out given command
 		var content = message.content.substring(1);
