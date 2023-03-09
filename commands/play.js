@@ -26,7 +26,7 @@ module.exports = {
 				return;
 			}
 
-			if (queue.isEmpty() && !queue.node.isPlaying()) {
+			if (queue.isEmpty() || queue.node.isPlaying()) {
 				message.reply("you didn't specify something for me to play");
 				return;
 			}
