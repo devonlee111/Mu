@@ -26,13 +26,19 @@ module.exports = {
 				return;
 			}
 
-			if (queue.isEmpty() && !queue.currentTrack) {
+			if (queue.isEmpty() && !queue.node.isPlaying()) {
 				message.reply("you didn't specify something for me to play");
 				return;
 			}
 
 			console.log("not playing anything, begin playing");
-			await queue.node.play();
+			try {
+				await queue.node.play();
+			} catch (e) {
+				console.log(e.message);
+				message.reply(`failed to play that: ${e}`);
+				return;
+			}
 			return;
 		}
 
@@ -64,6 +70,7 @@ module.exports = {
 			} catch (e) {
 				console.log(e.message);
 				message.reply(`failed to play that: ${e}`);
+				return;
 			}
 		}
 	},

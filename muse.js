@@ -70,7 +70,7 @@ player.events.on("error", (queue, error) => {
 });
 
 // Handle player connection errors
-player.events.on("playerError", (queue, error) => {
+player.events.on("playerError", (queue, error, track) => {
 	console.log(
 		`[${queue.guild.name}] Error emitted from the connection: ${error.message}`
 	);
@@ -81,16 +81,20 @@ player.events.on("playerStart", (queue, track) => {
 	// queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`)
 });
 
+player.events.on("playerSkip", (queue, track) => {
+	console.log(`player has skipped ${track.title}`);
+});
+
 player.events.on("emptyQueue", (queue) => {
 	console.log("queue has ended");
 });
 
 player.events.on("emptyChannel", (queue) => {
-	queue.destroy(true);
+	queue.delete(true);
 	console.log("I'm all alone. disconnecting...");
 });
 
-player.events.on("debug", (queuen, debugMessage) => {
+player.events.on("debug", (queue, debugMessage) => {
 	console.log(debugMessage);
 });
 
