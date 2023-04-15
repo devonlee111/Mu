@@ -56,7 +56,7 @@ module.exports = {
 		let embedMessage = undefined;
 		if (search.playlist) {
 			tracks = search.tracks;
-			embedMessage = embeds.createDiscordQueuePlaylistEmbed(tracks);
+			embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
 		} else {
 			tracks = search.tracks[0];
 			embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
