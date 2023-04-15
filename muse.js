@@ -93,7 +93,6 @@ player.events.on("emptyQueue", (queue) => {
 });
 
 player.events.on("emptyChannel", (queue) => {
-	queue.delete(true);
 	console.log("I'm all alone. disconnecting...");
 });
 
