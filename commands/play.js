@@ -45,6 +45,7 @@ module.exports = {
 		// Handle non-empty query case
 		let search = await player.search(query, {
 			requestedBy: message.author,
+			searchEngine: "youtubeSearch",
 		});
 
 		if (!search) {
