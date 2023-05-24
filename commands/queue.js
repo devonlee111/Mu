@@ -30,13 +30,27 @@ module.exports = {
 
 		let tracks = undefined;
 		let embedMessage = undefined;
+
 		if (search.playlist) {
 			tracks = search.tracks;
+			console.log(tracks)
+			if (tracks == undefined) {
+				message.reply("o noes. that pwaywist is bwoken. pwease try a different link or search");
+				return;
+			}
+
 			embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
 		} else {
+			console.log(search.tracks);
 			tracks = search.tracks[0];
+			if (tracks == undefined) {
+				message.reply("o noes. that track is bwoken. pwease try a different link or search");
+				return;
+			}
+
 			embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
 		}
+
 		queue.addTrack(tracks);
 		message.channel.send({ embeds: [embedMessage] });
 	},
