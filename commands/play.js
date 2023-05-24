@@ -1,4 +1,3 @@
-const embeds = require("../common/embeds.js");
 const tools = require("../common/tools.js");
 
 module.exports = {
@@ -42,40 +41,16 @@ module.exports = {
 			return;
 		}
 
-		// Handle non-empty query case
-		let search = await player.search(query, {
-			requestedBy: message.author,
-			searchEngine: "youtubeSearch",
-		});
-
-		if (!search) {
-			message.reply("whoops. I wasn't able to find that for you");
+		if (
+			!(await tools.performSearchAndQueueWithRetry(
+				player,
+				queue,
+				message,
+				query
+			))
+		) {
 			return;
 		}
-
-		let tracks = undefined;
-		let embedMessage = undefined;
-		if (search.playlist) {
-			tracks = search.tracks;
-			if (tracks == undefined) {
-				message.reply("o noes. that pwaywist is bwoken. pwease try a different link or search");
-				return
-			}
-
-			embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
-		} else {
-			console.log(search.tracks)
-			tracks = search.tracks[0];
-			console.log(tracks)
-			if (tracks == undefined) {
-				message.reply("o noes. that track is bwoken. pwease try a different link or search");
-				return
-			}
-
-			embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
-		}
-		queue.addTrack(tracks);
-		message.channel.send({ embeds: [embedMessage] });
 
 		if (!queue.node.isPlaying()) {
 			try {
