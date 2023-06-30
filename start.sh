@@ -1,3 +1,3 @@
 #!/bin/bash
 
-node muse.js > log.txt 2> log.txt &
+node src/muse.js > log.txt 2> log.txt &

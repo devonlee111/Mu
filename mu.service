@@ -1,0 +1,13 @@
+[Unit]
+Description="Mμse Discord Music Bot"
+After=network.target
+
+[Service]
+Type=simple
+User=Muse
+ExecStart=/usr/bin/node /opt/Mu/muse.js
+RestartSec=10
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

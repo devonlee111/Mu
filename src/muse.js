@@ -8,7 +8,7 @@ const {
 	NewsChannel,
 } = require("discord.js");
 const { Player } = require("discord-player");
-const { token, prefix, ytCookie } = require("./config.json");
+const { token, prefix, ytCookie } = require("../config.json");
 
 // ========== BOT SETUP ========== //
 
