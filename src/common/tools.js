@@ -1,4 +1,4 @@
-const embeds = require("embeds.js");
+const embeds = require("./embeds.js");
 
 module.exports = {
 	async ensureVoiceChannelConnection(queue, message) {
