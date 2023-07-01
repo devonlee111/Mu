@@ -22,32 +22,45 @@ install_dependencies () {
 	apt upgrade -y
 	echo "Upgrade installation complete."
 
-	echo "Setting up PPA for latest nodeJS..."
-	curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash -
-	echo "Finished setting up latest nodeJS PPA."
-
-	echo "Installing required dependencies..."
+	echo "Installing system dependencies..."
 	apt install -y build-essential gcc g++ make curl ffmpeg
-	echo "Installing NodeJS..."
-	apt install -y nodejs
+	echo "System dependencies installed"
+
+	echo "Installing latest NodeJS..."
+	curl -fsSL https://deb.nodesource.com/setup_current.x | sudo bash - && apt install -y nodejs
+	echo "Latest NodeJS installed."
+
 	echo "Required dependencies installed"
 }
 
 setup_service () {
 	echo "Setting up Muse Discord Bot service..."
+
+	echo "Adding Muse user..."
 	useradd --system muse
+	echo "Muse user added."
+
+	echo "Copying program files to installation directory..."
 	cp -r ../Mu/ /opt/
 	cp mu.service /etc/systemd/system/
+	echo "Program files copied to installation directory."
 
 	cd /opt/Mu/ || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
 	echo "Installing required node packages..."
 	npm install
 	echo "Required node packages installed."
+
+	echo "Muse Discord Bot service setup complete."
 }
 
 start_service () {
-	systemctl start mu.service
+	echo "Enabling Muse service..."
 	systemctl enable mu.service
+
+	echo "Starting Muse service..."
+	systemctl start mu.service
+
+	echo "Muse service enabled and started."
 }
 
 guided_setup () {
@@ -86,3 +99,5 @@ install_dependencies
 setup_service
 guided_setup
 start_service
+
+echo "Muse is now installed"
