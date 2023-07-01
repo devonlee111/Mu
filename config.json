@@ -1,0 +1,6 @@
+{
+	"token": "##DiscordToken##",
+	"clientId": "##DiscordClientID##",
+	"prefix": "##Prefix##",
+	"ytCookie": "##YtCookie##"
+}
