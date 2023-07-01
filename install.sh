@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MUSE_CONFIG_JSON="config.json"
+MUSE_CONFIG_JSON="/opt/Mu/config.json"
 DISCORD_TOKEN_PLACEHOLDER="##DiscordToken##"
 DISCORD_CLIENT_ID_PLACEHOLDER="##DiscordClientID##"
 DISCORD_COMMAND_PREFIX_PLACEHOLDER="##Prefix##"
@@ -31,10 +31,6 @@ install_dependencies () {
 	echo "Installing NodeJS..."
 	apt install -y nodejs
 	echo "Required dependencies installed"
-
-	echo "Installing required node packages..."
-	npm install
-	echo "Required node packages installed."
 }
 
 setup_service () {
@@ -42,6 +38,14 @@ setup_service () {
 	useradd --system muse
 	cp -r ../Mu/ /opt/
 	cp mu.service /etc/systemd/system/
+
+	cd /opt/Mu/ || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
+	echo "Installing required node packages..."
+	npm install
+	echo "Required node packages installed."
+}
+
+start_service () {
 	systemctl start mu.service
 	systemctl enable mu.service
 }
@@ -78,6 +82,7 @@ guided_setup () {
 	sed -i "s${delim}$YOUTUBE_COOKIE_PLACEHOLDER${delim}$ytCookie${delim}g" "$MUSE_CONFIG_JSON"
 }
 
-guided_setup
 install_dependencies
 setup_service
+guided_setup
+start_service
