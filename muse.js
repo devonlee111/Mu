@@ -8,6 +8,7 @@ const {
 	NewsChannel,
 } = require("discord.js");
 const { Player } = require("discord-player");
+const logger = require("../common/logger.js");
 const { token, prefix, ytCookie } = require("./config.json");
 
 // ========== BOT SETUP ========== //
@@ -109,6 +110,7 @@ client.once("ready", () => {
 
 // Check new messages for command prefix and handle accordingly
 client.on("messageCreate", async (message) => {
+	logger.logDiscordMessage(message);
 	if (message.content.startsWith(prefix)) {
 		console.log("detected command: " + message.content);
 		// Parse out given command

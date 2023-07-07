@@ -1,7 +1,22 @@
 const winston = require("winston");
+const fs = require("fs");
+
+const DISCORD_MESSAGE_LOG_FILE = "/var/log/muse/message.log";
 
 module.exports = {
-	logDiscordMessage() {},
+	logDiscordMessage(message) {
+		logMsg =
+			message.createdAt.toString() +
+			": " +
+			message.author.username +
+			": " +
+			message.content;
+		try {
+			fs.writeFile(DISCORD_MESSAGE_LOG_FILE, logMsg);
+		} catch (err) {
+			console.log(err);
+		}
+	},
 	logDiscordCommand() {},
 	writeErrorLog() {},
 	writeWarnLog() {},
