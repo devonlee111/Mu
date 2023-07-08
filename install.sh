@@ -1,5 +1,6 @@
 #!/bin/bash
 
+MUSE_INSTALLATION_DIR="/opt/Mu/"
 MUSE_CONFIG_JSON="/opt/Mu/config.json"
 DISCORD_TOKEN_PLACEHOLDER="##DiscordToken##"
 DISCORD_CLIENT_ID_PLACEHOLDER="##DiscordClientID##"
@@ -45,7 +46,7 @@ setup_service () {
 	cp mu.service /etc/systemd/system/
 	echo "Program files copied to installation directory."
 
-	cd /opt/Mu/ || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
+	cd "$MUSE_INSTALLATION_DIR" || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
 	echo "Installing required node packages..."
 	npm install
 	echo "Required node packages installed."
@@ -95,9 +96,24 @@ guided_setup () {
 	sed -i "s${delim}$YOUTUBE_COOKIE_PLACEHOLDER${delim}$ytCookie${delim}g" "$MUSE_CONFIG_JSON"
 }
 
-install_dependencies
-setup_service
-guided_setup
-start_service
+perform_clean_install () {
+	echo "performing first time clean installation..."
+	install_dependencies
+	setup_service
+	guided_setup
+	start_service
+	echo "Muse is now installed"
+}
 
-echo "Muse is now installed"
+perform_installation_upgrade () {
+	echo "performing existing installation upgrade..."
+	echo "this is not implemented yet... a manual upgrade may be required"
+	# TODO perform installation upgrade
+}
+
+if [ ! -d "$MUSE_INSTALLATION_DIR" ];
+	then
+		perform_clean_install
+	else
+		perform_installation_upgrade
+fi
