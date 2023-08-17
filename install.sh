@@ -45,7 +45,7 @@ install_node_packages () {
 
 copy_files_to_install_dir () {
 	echo "Copying program files to installation directory..."
-	cp -r ../* "$MUSE_INSTALLATION_DIR"
+	cp -r ./* "$MUSE_INSTALLATION_DIR"
 	cp mu.service /etc/systemd/system/
 	echo "Program files copied to installation directory."
 }
@@ -118,13 +118,13 @@ perform_clean_install () {
 
 perform_installation_upgrade () {
 	echo "performing existing installation upgrade..."
-	echo "this is not implemented yet... a manual upgrade may be required"
+	echo "this is not fully implemented yet... a manual upgrade may be required"
 
 	echo "Stopping Muse service..."
 	systemctl stop mu.service
 
 	# TODO proper dealing with config.json if new fields are ever added
-	cp "$MUSE_INSTALLATION_DIR + config.json" ./
+	cp "$MUSE_INSTALLATION_DIR/config.json" ./
 	copy_files_to_install_dir
 
 	install_node_packages
