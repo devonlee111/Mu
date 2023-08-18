@@ -1,18 +1,19 @@
 const winston = require("winston");
 const fs = require("fs");
 
-const DISCORD_MESSAGE_LOG_FILE = "/var/log/muse/message.log";
+const MUSE_LOG_DIR = "/var/log/muse/";
+const DISCORD_MESSAGES_LOG_SUBDIR = "discord_messages/";
+const DISCORD_MESSAGES_LOG_FILE = "messages.log";
 
 module.exports = {
 	logDiscordMessage(message) {
-		logMsg =
-			message.createdAt.toString() +
-			": " +
-			message.author.username +
-			": " +
-			message.content;
+		channel = message.channelId;
+		logMsg = `${message.createdAt.toString()}: ${message.author.username}: ${
+			message.content
+		}`;
+		log_file = `${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}${channel}${DISCORD_MESSAGES_LOG_FILE}`;
 		try {
-			fs.writeFile(DISCORD_MESSAGE_LOG_FILE, logMsg);
+			fs.writeFileSync(log_file, logMsg);
 		} catch (err) {
 			console.log(err);
 		}
