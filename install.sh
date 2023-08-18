@@ -2,6 +2,8 @@
 
 MUSE_INSTALLATION_DIR="/opt/Mu/"
 MUSE_CONFIG_JSON="/opt/Mu/config.json"
+MUSE_LOG_DIR="/var/log/muse/"
+DISCORD_MESSAGES_LOG_SUBDIR="discord_messages/"
 DISCORD_TOKEN_PLACEHOLDER="##DiscordToken##"
 DISCORD_CLIENT_ID_PLACEHOLDER="##DiscordClientID##"
 DISCORD_COMMAND_PREFIX_PLACEHOLDER="##Prefix##"
@@ -48,6 +50,11 @@ copy_files_to_install_dir () {
 	cp -r ./* "$MUSE_INSTALLATION_DIR"
 	cp mu.service /etc/systemd/system/
 	echo "Program files copied to installation directory."
+}
+
+create_logging_dir() {
+	mkdir -p "$MUSE_LOG_DIR$DISCORD_MESSAGES_LOG_SUBDIR"
+	chown -R muse "$MUSE_LOG_DIR$DISCORD_MESSAGES_LOG_SUBDIR"
 }
 
 setup_service () {
@@ -137,6 +144,11 @@ perform_installation_upgrade () {
 
 	echo "Muse has been upgraded"
 }
+
+if [ ! -d "$MUSE_LOG_DIR" ];
+	then
+		create_logging_dir
+fi
 
 if [ ! -d "$MUSE_INSTALLATION_DIR" ];
 	then
