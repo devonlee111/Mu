@@ -11,9 +11,16 @@ module.exports = {
 		logMsg = `${message.createdAt.toString()}: ${message.author.username}: ${
 			message.content
 		}`;
-		log_file = `${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}${channel}${DISCORD_MESSAGES_LOG_FILE}`;
+		logFileDir = `${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}${channel}`;
+		logFile = `${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}${channel}/${DISCORD_MESSAGES_LOG_FILE}`;
+		if (!fs.existsSync(logFileDir)) {
+			fs.mkdir(logFileDir, (err) => {
+				console.log("failed to create new directory for discord message logging: ", err);
+				return;
+			})
+		}
 		try {
-			fs.writeFileSync(log_file, logMsg);
+			fs.writeFileSync(logFile, logMsg);
 		} catch (err) {
 			console.log(err);
 		}
