@@ -6,6 +6,15 @@ const DISCORD_MESSAGES_LOG_SUBDIR = "discord_messages/";
 const DISCORD_MESSAGES_LOG_FILE = "messages.log";
 
 module.exports = {
+	setupLoggingDir() {
+		if (!fs.existsSync(MUSE_LOG_DIR)) {
+			fs.mkdirSync(MUSE_LOG_DIR);
+		}
+
+		if (!fs.existsSync(`${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}`)) {
+			fs.mkdirSync(`${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}`);
+		}
+	},
 	logDiscordMessage(message) {
 		channel = message.channelId;
 		logMsg = `${message.createdAt.toString()}: ${message.author.username}: ${

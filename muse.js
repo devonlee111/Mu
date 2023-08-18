@@ -13,6 +13,8 @@ const { token, prefix, ytCookie } = require("./config.json");
 
 // ========== BOT SETUP ========== //
 
+logger.setupLoggingDir();
+
 // Create a new client instance
 const client = new Client({
 	intents: [
