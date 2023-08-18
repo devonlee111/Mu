@@ -1,5 +1,6 @@
 #!/bin/bash
 
+MUSE_INSTALLATION_DIR="/opt/Mu/"
 MUSE_CONFIG_JSON="/opt/Mu/config.json"
 DISCORD_TOKEN_PLACEHOLDER="##DiscordToken##"
 DISCORD_CLIENT_ID_PLACEHOLDER="##DiscordClientID##"
@@ -12,6 +13,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 install_dependencies () {
+	# TODO move to using a dependency file if dependency list ever changes
 	echo "Installing required dependencies..."
 
 	echo "Fetching updates..."
@@ -33,6 +35,21 @@ install_dependencies () {
 	echo "Required dependencies installed"
 }
 
+install_node_packages () {
+	cd "$MUSE_INSTALLATION_DIR" || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
+	echo "Installing required node packages..."
+	npm install
+	echo "Required node packages installed."
+	# TODO change dir back to original (do when becomes necessary)
+}
+
+copy_files_to_install_dir () {
+	echo "Copying program files to installation directory..."
+	cp -r ./* "$MUSE_INSTALLATION_DIR"
+	cp mu.service /etc/systemd/system/
+	echo "Program files copied to installation directory."
+}
+
 setup_service () {
 	echo "Setting up Muse Discord Bot service..."
 
@@ -40,15 +57,10 @@ setup_service () {
 	useradd --system muse
 	echo "Muse user added."
 
-	echo "Copying program files to installation directory..."
-	cp -r ../Mu/ /opt/
-	cp mu.service /etc/systemd/system/
-	echo "Program files copied to installation directory."
+	mkdir "$MUSE_INSTALLATION_DIR"
+	copy_files_to_install_dir
 
-	cd /opt/Mu/ || { echo "Failed to change to installation directory to install node packages..."; exit 1; }
-	echo "Installing required node packages..."
-	npm install
-	echo "Required node packages installed."
+	install_node_packages
 
 	echo "Muse Discord Bot service setup complete."
 }
@@ -95,9 +107,40 @@ guided_setup () {
 	sed -i "s${delim}$YOUTUBE_COOKIE_PLACEHOLDER${delim}$ytCookie${delim}g" "$MUSE_CONFIG_JSON"
 }
 
-install_dependencies
-setup_service
-guided_setup
-start_service
+perform_clean_install () {
+	echo "performing first time clean installation..."
+	install_dependencies
+	setup_service
+	guided_setup
+	start_service
+	echo "Muse is now installed"
+}
 
-echo "Muse is now installed"
+perform_installation_upgrade () {
+	echo "performing existing installation upgrade..."
+	echo "this is not fully implemented yet... a manual upgrade may be required"
+
+	echo "Stopping Muse service..."
+	systemctl stop mu.service
+
+	# TODO proper dealing with config.json if new fields are ever added
+	cp "$MUSE_INSTALLATION_DIR/config.json" ./
+	copy_files_to_install_dir
+
+	install_node_packages
+
+	echo "Reloading Systemd..."
+	systemctl daemon-reload
+
+	echo "Starting Muse service..."
+	systemctl start mu.service
+
+	echo "Muse has been upgraded"
+}
+
+if [ ! -d "$MUSE_INSTALLATION_DIR" ];
+	then
+		perform_clean_install
+	else
+		perform_installation_upgrade
+fi
