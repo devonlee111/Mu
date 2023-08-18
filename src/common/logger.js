@@ -8,7 +8,7 @@ const DISCORD_MESSAGES_LOG_FILE = "messages.log";
 module.exports = {
 	logDiscordMessage(message) {
 		channel = message.channelId;
-		logMsg = `${message.createdAt.toString()}: ${message.author.username}: ${
+		logMsg = `${message.createdAt.toString()}| ${message.author.username}: ${
 			message.content
 		}\n`;
 		logFileDir = `${MUSE_LOG_DIR}${DISCORD_MESSAGES_LOG_SUBDIR}${channel}`;
