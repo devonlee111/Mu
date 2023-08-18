@@ -8,7 +8,7 @@ const {
 	NewsChannel,
 } = require("discord.js");
 const { Player } = require("discord-player");
-const logger = require("../common/logger.js");
+const logger = require(".src/common/logger.js");
 const { token, prefix, ytCookie } = require("./config.json");
 
 // ========== BOT SETUP ========== //
