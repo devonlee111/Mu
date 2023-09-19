@@ -1,23 +1,18 @@
+const tools = require("../common/tools.js");
+
 module.exports = {
 	name: "loop",
-	async execute(message, player) {
-		if (player == undefined) {
-			message.reply("oopsie-doodle. something's gone terrible wrong");
-			return;
-		}
-
-		let queue = player.nodes.get(message.guild);
-		if (queue == undefined) {
-			message.reply("There is nothing playing for me to loop");
-			return;
-		}
-
+	async execute(message) {
+		let queue = tools.ensureGetQueue(message);
+		
 		if (queue.repeatMode == 1) {
 			message.reply("alright. will stop looping current track");
 			queue.setRepeatMode(0);
-		} else {
-			message.reply("ok. looping current track");
-			queue.setRepeatMode(1);
+			return;
 		}
+
+		message.reply("ok. looping current track");
+		queue.setRepeatMode(1);
+		return;
 	},
 };

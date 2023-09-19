@@ -1,3 +1,4 @@
+const { useMainPlayer } = require('discord-player');
 const tools = require("../common/tools.js");
 
 module.exports = {
@@ -5,61 +6,44 @@ module.exports = {
 	// 1.  Queue any media provided by user
 	// 2a. Resume playing if it is paused
 	// 2b. Start playing if it is not currently playing
-	async execute(message, player = undefined) {
-		if (player == undefined) {
-			message.reply("oopsie-doodle. something's gone terrible wrong");
-			return;
+	async execute(message) {
+		let player = useMainPlayer();
+		let queue = tools.ensureGetQueue(message);
+		let channel = message.member.voice.channel;
+
+		if (!channel) {
+			return message.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
 		}
 
-		let query = message.content.trim();
-		let queue = tools.ensureGetQueue(player, message);
+		let query = message.content.trim(); // we need input/query to play
+		await tools.ensureVoiceChannelConnection(message);
 
-		if (!(await tools.ensureVoiceChannelConnection(queue, message))) {
-			return;
-		}
-
-		// Handle empty query case
-		if (query == "") {
+		if (query == "" )  {
 			if (queue.node.isPaused()) {
 				queue.node.resume();
+				message.reply(`beginning playback`);
 				return;
 			}
-
-			if (queue.isEmpty() || queue.node.isPlaying()) {
-				message.reply("you didn't specify something for me to play");
+			if (!queue.node.isPlaying()) {
+				queue.node.play();
+				message.reply(`beginning playback`);
 				return;
 			}
-
-			console.log("not playing anything, begin playing");
-			try {
-				await queue.node.play();
-			} catch (e) {
-				console.log(e.message);
-				message.reply(`failed to play that: ${e}`);
-				return;
-			}
-			return;
 		}
 
-		if (
-			!(await tools.performSearchAndQueueWithRetry(
-				player,
-				queue,
-				message,
-				query
-			))
-		) {
+		try {
+			const { track } = await player.play(channel, query, {
+				nodeOptions: {
+					// nodeOptions are the options for guild node (aka your queue in simple word)
+					metadata: message // we can access this metadata object using queue.metadata later on
+				}
+			});
+			message.reply(`**${track.title}** enqueued!`);
 			return;
-		}
-
-		if (!queue.node.isPlaying()) {
-			try {
-				await queue.node.play();
-			} catch (e) {
-				console.log(e.message);
-				message.reply(`failed to play that: ${e}`);
-				return;
-			}
+		} catch (e) {
+			// let's return error if something failed
+			message.reply(`Something went wrong: ${e}`);
+			return;
 		}
 	},
 };

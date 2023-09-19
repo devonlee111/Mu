@@ -45,7 +45,17 @@ for (const file of commandFiles) {
 }
 
 // Setup discord player
-const player = Player.singleton(client, {
+const player = new Player(client, {
+	ytdlOptions: {
+		requestOptions: {
+			headers: {
+				cookie: ytCookie,
+			},
+		}
+	}
+});
+/*
+const player = new Player(client, {
 	ytdlOptions: {
 		requestOptions: {
 			headers: {
@@ -54,12 +64,15 @@ const player = Player.singleton(client, {
 		},
 		filter: "audioonly",
 		quality: "highestaudio",
-		highWaterMark: 1 << 62,
+		highWaterMark: 1 << 25, //62,
 		liveBuffer: 1 << 62,
 		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
 		bitrate: 128,
 	},
 });
+*/
+
+player.extractors.loadDefault((ext) => ext == "YouTubeExtractor");
 
 console.log("Mμse bot setup complete");
 
