@@ -2,7 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
 	// Creates a discord embed for showing the current queue
-	createDiscordQueueEmbed(queue) {
+	createDiscordQueueEmbed(queue, message) {
 		let currentTrack = queue.currentTrack;
 
 		let queueEmbed = new EmbedBuilder()
@@ -17,7 +17,9 @@ module.exports = {
 		if (queue.tracks.size == 0 && !currentTrack) {
 			queueString = "Queue Empty";
 		} else {
-			queueString = "**>** " + currentTrack.title + " **<**\n";
+			if (currentTrack) {
+				queueString = "**>** " + currentTrack.title + " **<**\n";
+			}
 			for (var i = 0; i < queue.tracks.size; i++) {
 				let rowString = "\n" + (i + 1) + ". " + queue.tracks.at(i).title + "\n";
 				queueString += rowString;

@@ -8,8 +8,8 @@ module.exports = {
 			return;
 		}
 
-		let queue = tools.ensureGetQueue(player, message);
+		let queue = tools.ensureGetQueue(message);
 
-		await tools.ensureVoiceChannelConnection(queue, message);
+		await tools.ensureVoiceChannelConnection(message);
 	},
 };

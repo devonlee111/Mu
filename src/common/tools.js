@@ -1,43 +1,34 @@
+const { useMainPlayer, useQueue } = require('discord-player');
 const embeds = require("./embeds.js");
 
 module.exports = {
-	async ensureVoiceChannelConnection(queue, message) {
-		if (queue.connection == undefined) {
-			try {
-				await queue.connect(message.member.voice.channel);
-			} catch (e) {
-				console.log(e.message);
-				message.reply("oh no. I can't join the vc");
-				queue.delete();
-				return false;
-			}
+	async ensureVoiceChannelConnection(message) {
+		let queue = this.ensureGetQueue(message)
+
+		if (queue.connection != undefined) {
+			return true;
+		}
+			
+		try {
+			await queue.connect(message.member.voice.channel);
+		} catch (e) {
+			console.log(e.message);
+			message.reply("oh no. I can't join the vc");
+			queue.delete();
+			return false;
 		}
 		return true;
 	},
-	ensureGetQueue(player, message) {
-		let queue = player.nodes.get(message.guild);
-		if (queue == undefined) {
-			queue = createQueue(player, message);
-		} else {
-			queue = player.nodes.get(message.guild);
-		}
-		return queue;
+	ensureGetQueue(message) {
+		return getCreateQueue(message);
 	},
-	async performSearchAndQueueWithRetry(
-		player,
-		queue,
-		message,
-		query,
-		engine = "youtubeSearch",
-		maxRetries = 3
-	) {
+	async performSearchAndQueueWithRetry(message, query, engine = "youtubeSearch", maxRetries = 3) {
 		for (let retries = 0; retries < maxRetries; retries++) {
-			if (await performSearchAndQueue(player, queue, message, query, engine)) {
+			if (await performSearchAndQueue(message, query, engine)) {
 				return true;
-			} else if (retries == retryCount) {
-				message.reply(
-					"o noes. that search faiwed. pwease try a different link or search"
-				);
+			}
+
+			if (retries == retryCount) {
 				return false;
 			}
 		}
@@ -45,8 +36,20 @@ module.exports = {
 	},
 };
 
-function createQueue(player, message) {
-	queue = player.nodes.create(message.guild, {
+function getCreateQueue(message) {
+	let player = useMainPlayer(message.guild.id)
+	let queue = player.nodes.get(message.guild);
+	if (queue == null) {
+		console.log("create queue");
+		return createQueue(message);
+	}
+	console.log("queue exists");
+	return queue;
+}
+
+function createQueue(message) {
+	let player = useMainPlayer(message.guild.id)
+	let queue = player.nodes.create(message.guild, {
 		metadata: {
 			channel: message.channel,
 			client: message.guild.members.me,
@@ -60,9 +63,11 @@ function createQueue(player, message) {
 	return queue;
 }
 
-async function performSearchAndQueue(player, queue, message, query, engine) {
+async function performSearchAndQueue(message, query, engine) {
+	let player = useMainPlayer();
+	let queue = getCreateQueue(message);
 	let search = await player.search(query, {
-		requestedBy: message.author,
+		requestedBy: message.author.displayName,
 		searchEngine: engine,
 	});
 
@@ -93,6 +98,7 @@ async function performSearchAndQueue(player, queue, message, query, engine) {
 		embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
 	}
 
+	console.log("queue ", queue)
 	queue.addTrack(tracks);
 	message.channel.send({ embeds: [embedMessage] });
 

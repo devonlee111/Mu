@@ -3,30 +3,18 @@ const tools = require("../common/tools.js");
 
 module.exports = {
 	name: "queue",
-	async execute(message, player) {
-		if (player == undefined) {
-			message.reply("oopsie-doodle. something's gone terrible wrong");
-			return;
-		}
+	async execute(message) {
+		let queue = tools.ensureGetQueue(message);
 
-		query = message.content.trim();
-		let queue = tools.ensureGetQueue(player, message);
+		let query = message.content.trim(); // we need input/query to play
 
 		if (query == "") {
-			let embedMessage = embeds.createDiscordQueueEmbed(queue);
+			let embedMessage = embeds.createDiscordQueueEmbed(queue, message);
 			message.channel.send({ embeds: [embedMessage] });
 			return;
 		}
 
-		if (
-			!(await tools.performSearchAndQueueWithRetry(
-				player,
-				queue,
-				message,
-				query
-			))
-		) {
-			return;
-		}
+		await tools.performSearchAndQueueWithRetry(message, query);
+		return;
 	},
 };
