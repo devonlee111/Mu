@@ -21,7 +21,7 @@ module.exports = {
 		if (query == "" )  {
 			if (queue.node.isPaused()) {
 				queue.node.resume();
-				message.reply(`beginning playback`);
+				message.reply(`resuming playback`);
 				return;
 			}
 			if (!queue.node.isPlaying()) {

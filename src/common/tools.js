@@ -1,14 +1,14 @@
-const { useMainPlayer, useQueue } = require('discord-player');
+const { useMainPlayer, useQueue } = require("discord-player");
 const embeds = require("./embeds.js");
 
 module.exports = {
 	async ensureVoiceChannelConnection(message) {
-		let queue = this.ensureGetQueue(message)
+		let queue = this.ensureGetQueue(message);
 
 		if (queue.connection != undefined) {
 			return true;
 		}
-			
+
 		try {
 			await queue.connect(message.member.voice.channel);
 		} catch (e) {
@@ -22,9 +22,15 @@ module.exports = {
 	ensureGetQueue(message) {
 		return getCreateQueue(message);
 	},
-	async performSearchAndQueueWithRetry(message, query, engine = "youtubeSearch", maxRetries = 3) {
+	async performSearchAndQueueWithRetry(
+		message,
+		query,
+		trackIndex = -1,
+		engine = "youtubeSearch",
+		maxRetries = 3
+	) {
 		for (let retries = 0; retries < maxRetries; retries++) {
-			if (await performSearchAndQueue(message, query, engine)) {
+			if (await performSearchAndQueue(message, query, engine, trackIndex)) {
 				return true;
 			}
 
@@ -37,7 +43,7 @@ module.exports = {
 };
 
 function getCreateQueue(message) {
-	let player = useMainPlayer(message.guild.id)
+	let player = useMainPlayer(message.guild.id);
 	let queue = player.nodes.get(message.guild);
 	if (queue == null) {
 		console.log("create queue");
@@ -48,7 +54,7 @@ function getCreateQueue(message) {
 }
 
 function createQueue(message) {
-	let player = useMainPlayer(message.guild.id)
+	let player = useMainPlayer(message.guild.id);
 	let queue = player.nodes.create(message.guild, {
 		metadata: {
 			channel: message.channel,
@@ -63,7 +69,7 @@ function createQueue(message) {
 	return queue;
 }
 
-async function performSearchAndQueue(message, query, engine) {
+async function performSearchAndQueue(message, query, engine, trackIndex = -1) {
 	let player = useMainPlayer();
 	let queue = getCreateQueue(message);
 	let search = await player.search(query, {
@@ -98,8 +104,12 @@ async function performSearchAndQueue(message, query, engine) {
 		embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
 	}
 
-	console.log("queue ", queue)
-	queue.addTrack(tracks);
+	console.log("queue ", queue);
+	if (trackIndex == -1) {
+		queue.addTrack(tracks);
+	} else {
+		queue.insertTrack(tracks, trackIndex);
+	}
 	message.channel.send({ embeds: [embedMessage] });
 
 	return true;
