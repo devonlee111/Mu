@@ -3,82 +3,80 @@ const disadvantage = "disadv";	// Marked as 'b' in roll command
 const crit = "crit";			// Marked as 'c' in roll command
 const validRoll = /\d+d\d+(kh?l?\d+)?$/;
 
-module.exports = {
-   	name: "roll",
-		async execute(message) {
-			message.reply("ohs noes. dis is bwoken wight now. soz")
-			return
+export const name = "roll";
+export async function roll(message) {
+	message.reply("ohs noes. dis is bwoken wight now. soz");
+	return;
 
-        let originalInteraction = interaction;
-        let originalMessage = message;
-        let fullRoll = null;
-        let rollOperations = [];
-		let reply = '';
- 
-		// Check if command was from message or slash command and handle accordingly
-        if (interaction == null) {
-            if (message == null) {
-                // Should not happen
-                console.log('no interaction or message provided');
-                return
-            }
-            content = message.content.trim();
-            if (content === "") {
-				return 'I don\'t know what you want me to roll.'
-            }
+	let originalInteraction = interaction;
+	let originalMessage = message;
+	let fullRoll = null;
+	let rollOperations = [];
+	let reply = '';
 
-			fullRoll = content;
-            interaction = message;
-        }
-        else {
-            fullRoll = interaction.options.getString('dice');
-        }
-
-		// Standardize roll to lower case
-		fullRoll = fullRoll.toLowerCase();
-
-		// Remove all whitespace
-		fullRoll = fullRoll.replace(/\s/g, '');
-		// Replace roll modifiers with single characters
-		fullRoll = fullRoll.replace(/adv/gi, 'a');
-		fullRoll = fullRoll.replace(/disadv/gi, 'b');
-		fullRoll = fullRoll.replace(/crit/gi, 'c');
-
-		let subRoll = "";
-		// Parse full roll into seperate roll sub operations (rolls)
-		for (var i = 0; i < fullRoll.length; i++) {
-			character = fullRoll[i]
-			switch (character) {
-				case '+':
-				case '-':
-				case '<':
-				case '>':
-				case '(':
-				case ')':
-				case 'a':
-				case 'b':
-				case 'c':
-					if (subRoll != "") {
-						rollOperations.push(subRoll);
-					}
-					rollOperations.push(character);
-					subRoll = "";
-					break;
-				default:
-					subRoll += character;
-					break;
-			}
+	// Check if command was from message or slash command and handle accordingly
+	if (interaction == null) {
+		if (message == null) {
+			// Should not happen
+			console.log('no interaction or message provided');
+			return;
 		}
-		rollOperations.push(subRoll);
-		try {
-			let { fullRollOutcome, totalRoll } = executeRolls(rollOperations);
-			return "**Rolling " + fullRoll + ": **" + fullRollOutcome + "\n**You rolled:** " + totalRoll;
+		content = message.content.trim();
+		if (content === "") {
+			return 'I don\'t know what you want me to roll.';
 		}
-		catch (error) {
-			return error;
+
+		fullRoll = content;
+		interaction = message;
+	}
+	else {
+		fullRoll = interaction.options.getString('dice');
+	}
+
+	// Standardize roll to lower case
+	fullRoll = fullRoll.toLowerCase();
+
+	// Remove all whitespace
+	fullRoll = fullRoll.replace(/\s/g, '');
+	// Replace roll modifiers with single characters
+	fullRoll = fullRoll.replace(/adv/gi, 'a');
+	fullRoll = fullRoll.replace(/disadv/gi, 'b');
+	fullRoll = fullRoll.replace(/crit/gi, 'c');
+
+	let subRoll = "";
+	// Parse full roll into seperate roll sub operations (rolls)
+	for (var i = 0; i < fullRoll.length; i++) {
+		character = fullRoll[i];
+		switch (character) {
+			case '+':
+			case '-':
+			case '<':
+			case '>':
+			case '(':
+			case ')':
+			case 'a':
+			case 'b':
+			case 'c':
+				if (subRoll != "") {
+					rollOperations.push(subRoll);
+				}
+				rollOperations.push(character);
+				subRoll = "";
+				break;
+			default:
+				subRoll += character;
+				break;
 		}
-	},
-};
+	}
+	rollOperations.push(subRoll);
+	try {
+		let { fullRollOutcome, totalRoll } = executeRolls(rollOperations);
+		return "**Rolling " + fullRoll + ": **" + fullRollOutcome + "\n**You rolled:** " + totalRoll;
+	}
+	catch (error) {
+		return error;
+	}
+}
 
 function executeRolls(rollOperations) {
 	console.log(rollOperations);

@@ -1,16 +1,23 @@
 // Require the necessary discord.js classes
-const fs = require("fs");
-const path = require("node:path");
-const {
-	Client,
-	GatewayIntentBits,
-	Collection,
-	NewsChannel,
-} = require("discord.js");
-const { Player } = require("discord-player");
-const { token, prefix, ytCookie } = require("./config.json");
+import { readdirSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+import { Client, GatewayIntentBits, Collection, NewsChannel } from "discord.js";
+import { Player } from "discord-player";
+
+import { runCommand } from './src/commands/selector.mjs';
+
+// ========== GENERAL SETUP ========== //
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== BOT SETUP ========== //
+let config = JSON.parse(readFileSync('./config.json', 'utf8'));
+
+const token = config.token;
+const prefix = config.prefix;
+const ytCookie = config.ytCookie;
 
 // Create a new client instance
 const client = new Client({
@@ -24,14 +31,14 @@ const client = new Client({
 });
 
 // Load commands from command directory
+/*
 client.commands = new Collection();
-const commandsPath = path.join(__dirname, "/src/commands");
-const commandFiles = fs
-	.readdirSync(commandsPath)
-	.filter((file) => file.endsWith(".js"));
+const commandsPath = join(__dirname, "/src/commands");
+const commandFiles = readdirSync(commandsPath)
+	.filter((file) => file.endsWith(".mjs"));
 
 for (const file of commandFiles) {
-	let filePath = path.join(commandsPath, file);
+	let filePath = join(commandsPath, file);
 	let command = require(filePath);
 	// Check that potential command has the "execute" function
 	if ("execute" in command) {
@@ -43,6 +50,7 @@ for (const file of commandFiles) {
 		);
 	}
 }
+*/
 
 // Setup discord player
 const player = new Player(client, {
@@ -138,13 +146,17 @@ client.on("messageCreate", async (message) => {
 
 		cmd = cmd.toLowerCase();
 
+		runCommand(cmd, message);
+
+		/*
 		var command = client.commands.get(cmd);
 		if (command == null) {
 			return message.reply("That is not a command.");
 		}
+		*/
 
 		// execute the command
-		command.execute(message, player);
+		//command.execute(message, player);
 	}
 });
 
