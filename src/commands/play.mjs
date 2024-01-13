@@ -1,7 +1,7 @@
 import { useMainPlayer } from 'discord-player';
 import { ensureGetQueue, ensureVoiceChannelConnection } from "../common/tools.mjs";
 
-export const name = "play";
+
 export
 	// 1.  Queue any media provided by user
 	// 2a. Resume playing if it is paused

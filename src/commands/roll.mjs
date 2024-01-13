@@ -3,7 +3,7 @@ const disadvantage = "disadv";	// Marked as 'b' in roll command
 const crit = "crit";			// Marked as 'c' in roll command
 const validRoll = /\d+d\d+(kh?l?\d+)?$/;
 
-export const name = "roll";
+
 export async function roll(message) {
 	message.reply("ohs noes. dis is bwoken wight now. soz");
 	return;

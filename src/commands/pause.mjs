@@ -1,6 +1,6 @@
 import { ensureGetQueue } from "../common/tools.mjs";
 
-export const name = "pause";
+
 export async function pause(message) {
 	let queue = ensureGetQueue(message);
 

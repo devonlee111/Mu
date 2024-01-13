@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 
-export function createDiscordQueueEmbed(queue, message) {
+export function createDiscordQueueEmbed(queue) {
 	let currentTrack = queue.currentTrack;
 
 	let queueEmbed = new EmbedBuilder()

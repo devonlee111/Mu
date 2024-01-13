@@ -29,7 +29,7 @@ export async function runCommand(command, message) {
 		case "loop":
 			loop(message);
 			break;
-		case "loopAll":
+		case "loopall":
 			loopAll(message);
 			break;
 		case "pause":

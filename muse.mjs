@@ -1,16 +1,10 @@
 // Require the necessary discord.js classes
-import { readdirSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
 
-import { Client, GatewayIntentBits, Collection, NewsChannel } from "discord.js";
+import { Client, GatewayIntentBits } from "discord.js";
 import { Player } from "discord-player";
 
 import { runCommand } from './src/commands/selector.mjs';
-
-// ========== GENERAL SETUP ========== //
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== BOT SETUP ========== //
 let config = JSON.parse(readFileSync('./config.json', 'utf8'));
@@ -30,28 +24,6 @@ const client = new Client({
 	],
 });
 
-// Load commands from command directory
-/*
-client.commands = new Collection();
-const commandsPath = join(__dirname, "/src/commands");
-const commandFiles = readdirSync(commandsPath)
-	.filter((file) => file.endsWith(".mjs"));
-
-for (const file of commandFiles) {
-	let filePath = join(commandsPath, file);
-	let command = require(filePath);
-	// Check that potential command has the "execute" function
-	if ("execute" in command) {
-		// Set a new item in the Collection with the key as the command name and the value as the exported module
-		client.commands.set(command.name, command);
-	} else {
-		console.log(
-			`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-		);
-	}
-}
-*/
-
 // Setup discord player
 const player = new Player(client, {
 	ytdlOptions: {
@@ -62,23 +34,6 @@ const player = new Player(client, {
 		}
 	}
 });
-/*
-const player = new Player(client, {
-	ytdlOptions: {
-		requestOptions: {
-			headers: {
-				cookie: ytCookie,
-			},
-		},
-		filter: "audioonly",
-		quality: "highestaudio",
-		highWaterMark: 1 << 25, //62,
-		liveBuffer: 1 << 62,
-		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
-		bitrate: 128,
-	},
-});
-*/
 
 player.extractors.loadDefault((ext) => ext == "YouTubeExtractor");
 
@@ -147,16 +102,6 @@ client.on("messageCreate", async (message) => {
 		cmd = cmd.toLowerCase();
 
 		runCommand(cmd, message);
-
-		/*
-		var command = client.commands.get(cmd);
-		if (command == null) {
-			return message.reply("That is not a command.");
-		}
-		*/
-
-		// execute the command
-		//command.execute(message, player);
 	}
 });
 

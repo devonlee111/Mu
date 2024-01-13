@@ -1,4 +1,4 @@
-import { useMainPlayer, useQueue } from "discord-player";
+import { useMainPlayer } from "discord-player";
 import { createDiscordQueuePlaylistEmbed, createDiscordQueueMediaEmbed } from "./embeds.mjs";
 
 export async function ensureVoiceChannelConnection(message) {
@@ -21,11 +21,7 @@ export async function ensureVoiceChannelConnection(message) {
 export function ensureGetQueue(message) {
 	return getCreateQueue(message);
 }
-export async function performSearchAndQueueWithRetry(message,
-	query,
-	trackIndex = -1,
-	engine = "youtubeSearch",
-	maxRetries = 3) {
+export async function performSearchAndQueueWithRetry(message, query, trackIndex = -1, engine = "youtubeSearch", maxRetries = 3) {
 	for (let retries = 0; retries < maxRetries; retries++) {
 		if (await performSearchAndQueue(message, query, engine, trackIndex)) {
 			return true;

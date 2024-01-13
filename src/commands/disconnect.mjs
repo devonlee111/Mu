@@ -1,6 +1,6 @@
 import { useMainPlayer } from 'discord-player';
 
-export const name = "disconnect";
+
 export async function disconnect(message) {
 	let player = useMainPlayer();
 	if (player == undefined) {

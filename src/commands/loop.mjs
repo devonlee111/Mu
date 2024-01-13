@@ -1,6 +1,6 @@
 import { ensureGetQueue } from "../common/tools.mjs";
 
-export const name = "loop";
+
 export async function loop(message) {
 	let queue = ensureGetQueue(message);
 

@@ -1,6 +1,6 @@
 import { ensureGetQueue } from "../common/tools.mjs";
 
-export const name = "skip";
+
 export async function skip(message) {
 	let queue = ensureGetQueue(message);
 

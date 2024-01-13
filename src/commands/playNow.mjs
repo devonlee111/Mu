@@ -1,7 +1,7 @@
 import { useMainPlayer } from "discord-player";
 import { ensureGetQueue, ensureVoiceChannelConnection, performSearchAndQueueWithRetry } from "../common/tools.mjs";
 
-export const name = "playnow";
+
 export
 	// 1. Play any track given by user to play immediately
 	// 1a. Get information and requeue currently playing track to play next if currently playing
@@ -37,19 +37,12 @@ export
 
 	// insert next, and skip to given track if queue is not empty
 	// unpause/begin playing if needed
-	await performSearchAndQueueWithRetry(
-		message,
-		query,
-		(trackIndex = 0)
-	);
+	await performSearchAndQueueWithRetry(message, query, 0);
 
 	if (queue.node.isPaused()) {
 		queue.node.resume();
 		message.reply(`resuming playback`);
 	}
-	/*if (!queue.node.isPlaying()) {
-		queue.node.play();
-		message.reply(`beginning playback`);
-	}*/
+
 	queue.node.skip();
 }

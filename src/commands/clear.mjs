@@ -1,6 +1,6 @@
 import { ensureGetQueue } from "../common/tools.mjs";
 
-export const name = "clear";
+
 export async function clear(message) {
 	let queue = ensureGetQueue(message);
 
