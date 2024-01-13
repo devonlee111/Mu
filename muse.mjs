@@ -1,17 +1,17 @@
 // Require the necessary discord.js classes
-const fs = require("fs");
-const path = require("node:path");
-const {
-	Client,
-	GatewayIntentBits,
-	Collection,
-	NewsChannel,
-} = require("discord.js");
-const { Player } = require("discord-player");
-const logger = require("./src/common/logger.js");
-const { token, prefix, ytCookie } = require("./config.json");
+import { readFileSync } from 'fs';
+
+import { Client, GatewayIntentBits } from "discord.js";
+import { Player } from "discord-player";
+
+import { runCommand } from './src/commands/selector.mjs';
 
 // ========== BOT SETUP ========== //
+let config = JSON.parse(readFileSync('./config.json', 'utf8'));
+
+const token = config.token;
+const prefix = config.prefix;
+const ytCookie = config.ytCookie;
 
 // Create a new client instance
 const client = new Client({
@@ -24,27 +24,6 @@ const client = new Client({
 	],
 });
 
-// Load commands from command directory
-client.commands = new Collection();
-const commandsPath = path.join(__dirname, "/src/commands");
-const commandFiles = fs
-	.readdirSync(commandsPath)
-	.filter((file) => file.endsWith(".js"));
-
-for (const file of commandFiles) {
-	let filePath = path.join(commandsPath, file);
-	let command = require(filePath);
-	// Check that potential command has the "execute" function
-	if ("execute" in command) {
-		// Set a new item in the Collection with the key as the command name and the value as the exported module
-		client.commands.set(command.name, command);
-	} else {
-		console.log(
-			`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-		);
-	}
-}
-
 // Setup discord player
 const player = new Player(client, {
 	ytdlOptions: {
@@ -55,23 +34,6 @@ const player = new Player(client, {
 		}
 	}
 });
-/*
-const player = new Player(client, {
-	ytdlOptions: {
-		requestOptions: {
-			headers: {
-				cookie: ytCookie,
-			},
-		},
-		filter: "audioonly",
-		quality: "highestaudio",
-		highWaterMark: 1 << 25, //62,
-		liveBuffer: 1 << 62,
-		dlChunkSize: 0, // disabaling chunking is recommended in discord bot
-		bitrate: 128,
-	},
-});
-*/
 
 player.extractors.loadDefault((ext) => ext == "YouTubeExtractor");
 
@@ -123,7 +85,6 @@ client.once("ready", () => {
 
 // Check new messages for command prefix and handle accordingly
 client.on("messageCreate", async (message) => {
-	logger.logDiscordMessage(message);
 	if (message.content.startsWith(prefix)) {
 		console.log("detected command: " + message.content);
 		// Parse out given command
@@ -140,13 +101,7 @@ client.on("messageCreate", async (message) => {
 
 		cmd = cmd.toLowerCase();
 
-		var command = client.commands.get(cmd);
-		if (command == null) {
-			return message.reply("That is not a command.");
-		}
-
-		// execute the command
-		command.execute(message, player);
+		runCommand(cmd, message);
 	}
 });
 

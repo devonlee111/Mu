@@ -1,46 +1,38 @@
-const { useMainPlayer, useQueue } = require("discord-player");
-const embeds = require("./embeds.js");
+import { useMainPlayer } from "discord-player";
+import { createDiscordQueuePlaylistEmbed, createDiscordQueueMediaEmbed } from "./embeds.mjs";
 
-module.exports = {
-	async ensureVoiceChannelConnection(message) {
-		let queue = this.ensureGetQueue(message);
+export async function ensureVoiceChannelConnection(message) {
+	let queue = ensureGetQueue(message);
 
-		if (queue.connection != undefined) {
+	if (queue.connection != undefined) {
+		return true;
+	}
+
+	try {
+		await queue.connect(message.member.voice.channel);
+	} catch (e) {
+		console.log(e.message);
+		message.reply("oh no. I can't join the vc");
+		queue.delete();
+		return false;
+	}
+	return true;
+}
+export function ensureGetQueue(message) {
+	return getCreateQueue(message);
+}
+export async function performSearchAndQueueWithRetry(message, query, trackIndex = -1, engine = "youtubeSearch", maxRetries = 3) {
+	for (let retries = 0; retries < maxRetries; retries++) {
+		if (await performSearchAndQueue(message, query, engine, trackIndex)) {
 			return true;
 		}
 
-		try {
-			await queue.connect(message.member.voice.channel);
-		} catch (e) {
-			console.log(e.message);
-			message.reply("oh no. I can't join the vc");
-			queue.delete();
+		if (retries == retryCount) {
 			return false;
 		}
-		return true;
-	},
-	ensureGetQueue(message) {
-		return getCreateQueue(message);
-	},
-	async performSearchAndQueueWithRetry(
-		message,
-		query,
-		trackIndex = -1,
-		engine = "youtubeSearch",
-		maxRetries = 3
-	) {
-		for (let retries = 0; retries < maxRetries; retries++) {
-			if (await performSearchAndQueue(message, query, engine, trackIndex)) {
-				return true;
-			}
-
-			if (retries == retryCount) {
-				return false;
-			}
-		}
-		return false;
-	},
-};
+	}
+	return false;
+}
 
 function getCreateQueue(message) {
 	let player = useMainPlayer(message.guild.id);
@@ -91,7 +83,7 @@ async function performSearchAndQueue(message, query, engine, trackIndex = -1) {
 			return false;
 		}
 
-		embedMessage = embeds.createDiscordQueuePlaylistEmbed(search.playlist);
+		embedMessage = createDiscordQueuePlaylistEmbed(search.playlist);
 	} else {
 		// Handle individual track
 		console.log(search.tracks);
@@ -101,7 +93,7 @@ async function performSearchAndQueue(message, query, engine, trackIndex = -1) {
 			return false;
 		}
 
-		embedMessage = embeds.createDiscordQueueMediaEmbed(tracks);
+		embedMessage = createDiscordQueueMediaEmbed(tracks);
 	}
 
 	console.log("queue ", queue);
