@@ -1,13 +1,18 @@
 // Require the necessary discord.js classes
-import { readFileSync } from 'fs';
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 import { Client, GatewayIntentBits } from "discord.js";
 import { Player } from "discord-player";
 
-import { runCommand } from './src/commands/selector.mjs';
+import { runCommand } from "./src/commands/selector.mjs";
+
+// ========== GENERAL SETUP ========== //
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== BOT SETUP ========== //
-let config = JSON.parse(readFileSync('./config.json', 'utf8'));
+let config = JSON.parse(readFileSync(join(__dirname, "./config.json"), "utf8"));
 
 const token = config.token;
 const prefix = config.prefix;
@@ -31,8 +36,8 @@ const player = new Player(client, {
 			headers: {
 				cookie: ytCookie,
 			},
-		}
-	}
+		},
+	},
 });
 
 player.extractors.loadDefault((ext) => ext == "YouTubeExtractor");
